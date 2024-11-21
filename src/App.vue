@@ -16,7 +16,7 @@
                 <el-main style="padding: 20px; background-color: #ffffff;">
                     <div class="content">
                         <!-- 添加动态内容展示的区域 -->
-                         <BugersLiner></BugersLiner>
+                         <BurgersLiner></BurgersLiner>
                     </div>
                 </el-main>
             </el-container>
