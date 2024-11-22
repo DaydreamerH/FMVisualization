@@ -37,6 +37,10 @@
             <span>粘度系数 (V值)：</span>
             <el-slider v-model="selectedV" :min="0.2" :max="4.8" :step="0.2" show-tooltip @change="submitData" />
           </li>
+          <li>
+            <span>等高线级数：</span>
+            <el-slider v-model="contourLevels" :min="5" :max="50" :step="1" show-tooltip @change="submitData" />
+          </li>
         </ul>
         <button @click="submitData" class="confirm">提交</button>
       </div>
@@ -50,16 +54,17 @@ import Plotly from 'plotly.js-dist'; // 从 dist 版本导入
 import { ElSlider } from 'element-plus';
 
 export default {
-  name: 'BurgersLiner',
+  name: 'BurgersHeat',
   components: {
     ElSlider,
   },
   data() {
     return {
-      firstParm: '0', // 默认选中的维度
-      secondParm: '1', // 默认选中的维度
+      firstParm: null, // 默认选中的维度
+      secondParm: null, // 默认选中的维度
       fileContent: [], // 用于存储文件数据
       selectedV: 0.2, // 默认选中的 V 值
+      contourLevels: 10, // 默认等高线级数（通过滑块控制）
     };
   },
   methods: {
@@ -79,6 +84,7 @@ export default {
       const firstParm = parseInt(this.firstParm);
       const secondParm = parseInt(this.secondParm);
       const selectedV = this.selectedV;
+      const contourLevels = this.contourLevels; // 获取用户设置的等高线级数
 
       // 筛选数据：第三列为 selectedV 的数据
       const filteredData = this.fileContent.filter(
@@ -105,16 +111,30 @@ export default {
         }
       });
 
+      // 计算 Z 值的最小值和最大值
+      const minZ = Math.min(...zGrid.flat());
+      const maxZ = Math.max(...zGrid.flat());
+
+      // 设置等高线的起始值、结束值和间隔
+      const start = minZ; // 起始值，U值的最小值
+      const end = maxZ; // 结束值，U值的最大值
+      const size = (end - start) / contourLevels; // 每个等高线之间的间隔
+
       // 配置 Plotly 绘图数据
       const contourData = {
         z: zGrid,
         x: xValues,
         y: yValues,
         type: "contour", // 等高线图
-        colorscale: "Viridis", // 颜色渐变
+        colorscale: "Jet", // 设置 Jet 颜色渐变
         contours: {
           coloring: "fill", // 填充等高线区域
           showlines: true, // 显示等高线
+          autocontour: false, // 关闭自动等高线计算
+          start: start, // 起始值
+          end: end, // 结束值
+          size: size, // 等高线间隔
+          showlines: false, // 不显示等高线
         },
         colorbar: {
           title: "U 值",
@@ -134,8 +154,8 @@ export default {
 
       // 获取 Plotly 容器并绘制图表
       const chartDom = document.getElementById("plotly-chart");
-      Plotly.newPlot(chartDom, [contourData], layout);
-    }
+      Plotly.react(chartDom, [contourData], layout); // 使用 react 确保图表刷新
+    },
   },
 };
 </script>
