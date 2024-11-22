@@ -94,13 +94,14 @@ export default {
                         return newRow;
                     });
 
-                    // 提取 MACH_NUMBER和REYNOLDS_NUMBER的最小值和最大值
-                    const machNumbers = this.fileContent.map(row => row['MACH_NUMBER马赫数']);
-                    const reynoldsNumbers = this.fileContent.map(row => row['REYNOLDS_NUMBER雷诺数']);
+                    // 提取 MACH_NUMBER马赫数 和 REYNOLDS_NUMBER雷诺数 的数据
+                    const machNumbers = this.fileContent.map(row => row['MACH_NUMBER马赫数']).filter(value => !isNaN(value));
+                    const reynoldsNumbers = this.fileContent.map(row => row['REYNOLDS_NUMBER雷诺数']).filter(value => !isNaN(value));
 
-                    // 设置可选范围
-                    this.machOptions = this.generateRange(Math.min(...machNumbers), Math.max(...machNumbers), 0.01); // 假设步长为 0.01
-                    this.reynoldsOptions = this.generateRange(Math.min(...reynoldsNumbers), Math.max(...reynoldsNumbers), 10000); // 假设步长为 10000
+                    // 生成 MACH_NUMBER 和 REYNOLDS_NUMBER 的范围
+                    this.machOptions = [...new Set(machNumbers)].sort((a, b) => a - b); // 排序后去重
+                    this.reynoldsOptions = [...new Set(reynoldsNumbers)].sort((a, b) => a - b); // 排序后去重
+
                 },
                 header: true, // 使用第一行作为列名
                 skipEmptyLines: true, // 跳过空行
