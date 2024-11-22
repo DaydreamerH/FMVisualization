@@ -4,7 +4,7 @@
     <div class="content">
       <!-- 左侧：图表展示 -->
       <div class="chart-container">
-        <div id="chart" style="height: 100%;"></div>
+        <div id="plotly-chart" style="height: 100%;"></div>
       </div>
 
       <!-- 右侧：参数设置 -->
@@ -45,7 +45,8 @@
 </template>
 
 <script>
-import * as echarts from 'echarts';
+// 导入 Plotly.js
+import Plotly from 'plotly.js-dist'; // 从 dist 版本导入
 import { ElSlider } from 'element-plus';
 
 export default {
@@ -104,73 +105,40 @@ export default {
         }
       });
 
-      // 将网格数据转化为 ECharts 的热力图数据格式
-      const heatmapData = [];
-      zGrid.forEach((row, i) => {
-        row.forEach((value, j) => {
-          heatmapData.push([xValues[j], yValues[i], value]);
-        });
-      });
-
-      // 设置 ECharts 配置项
-      const chartDom = document.getElementById("chart");
-      if (echarts.getInstanceByDom(chartDom)) {
-        echarts.dispose(chartDom); // 销毁已存在的实例
-      }
-
-      const chart = echarts.init(chartDom);
-      const option = {
-        title: {
-          text: `Burgers 方程: ${['T', 'X', 'V', 'U'][firstParm]} 与 ${['T', 'X', 'V', 'U'][secondParm]} 的关系`,
+      // 配置 Plotly 绘图数据
+      const contourData = {
+        z: zGrid,
+        x: xValues,
+        y: yValues,
+        type: "contour", // 等高线图
+        colorscale: "Viridis", // 颜色渐变
+        contours: {
+          coloring: "fill", // 填充等高线区域
+          showlines: true, // 显示等高线
         },
-        tooltip: {
-          position: "top",
-          formatter: (params) => {
-            return `${['T', 'X', 'V', 'U'][firstParm]}: ${params.data[0]}<br/>
-                ${['T', 'X', 'V', 'U'][secondParm]}: ${params.data[1]}<br/>
-                U: ${params.data[2]}`;
-          },
+        colorbar: {
+          title: "U 值",
         },
-        xAxis: {
-          type: "category",
-          data: xValues,
-          name: ['T', 'X', 'V', 'U'][firstParm],
-        },
-        yAxis: {
-          type: "category",
-          data: yValues,
-          name: ['T', 'X', 'V', 'U'][secondParm],
-        },
-        visualMap: {
-          min: Math.min(...zGrid.flat()),
-          max: Math.max(...zGrid.flat()),
-          calculable: true,
-          inRange: {
-            color: ["#FFFFFF", "#FF0000"],
-          },
-        },
-        series: [
-          {
-            name: "U 值",
-            type: "heatmap",
-            data: heatmapData,
-            emphasis: {
-              itemStyle: {
-                borderColor: "#333",
-                borderWidth: 1,
-              },
-            },
-          },
-        ],
       };
 
-      chart.setOption(option);
+      // 配置布局
+      const layout = {
+        title: `Burgers 方程: ${['T', 'X', 'V', 'U'][firstParm]} 与 ${['T', 'X', 'V', 'U'][secondParm]} 的关系`,
+        xaxis: {
+          title: ['T', 'X', 'V', 'U'][firstParm],
+        },
+        yaxis: {
+          title: ['T', 'X', 'V', 'U'][secondParm],
+        },
+      };
+
+      // 获取 Plotly 容器并绘制图表
+      const chartDom = document.getElementById("plotly-chart");
+      Plotly.newPlot(chartDom, [contourData], layout);
     }
-    ,
   },
 };
 </script>
-
 
 <style scoped>
 .burgers-liner {
