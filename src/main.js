@@ -3,13 +3,21 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import App from './App.vue'
 import { createApp } from 'vue'
-import BurgersLiner from './components/parameters/BurgersLiner.vue'; 
+import BurgersLinear from './components/parameters/BurgersLinear.vue'; 
+import BurgersHeat from './components/parameters/BurgersHeat.vue';
+import NSLinear from './components/parameters/NSLinear.vue';
+import NSHeat from './components/parameters/NSHeat.vue';
+import M6Linear from './components/parameters/M6Linear.vue';
 import MainMenu from './components/MainMenu.vue';        
 
 const app = createApp(App);
 
 // 全局注册组件
-app.component('BurgersLiner', BurgersLiner);
+app.component('BurgersLinear', BurgersLinear);
 app.component('MainMenu', MainMenu);
+app.component('BurgersHeat', BurgersHeat);
+app.component('NSLinear', NSLinear);
+app.component('NSHeat', NSHeat);
+app.component('M6Linear', M6Linear);
 app.use(ElementPlus)
 app.mount('#app')

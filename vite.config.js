@@ -15,4 +15,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+
+  // 不然用不了
+  optimizeDeps: {
+    exclude: ['plotly.js']
+  }
 })

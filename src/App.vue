@@ -15,7 +15,11 @@
                 <el-main style="padding: 20px; background-color: #ffffff; flex-grow: 1;">
                     <div class="content">
                         <!-- 添加动态内容展示的区域 -->
-                        <BurgersLiner></BurgersLiner>
+                        <!-- <BurgersLinear></BurgersLinear> -->
+                         <!-- <BurgersHeat></BurgersHeat> -->
+                          <!-- <NSLinear></NSLinear> -->
+                           <!-- <NSHeat></NSHeat> -->
+                            <M6Linear></M6Linear>
                     </div>
                 </el-main>
             </el-container>
@@ -24,6 +28,10 @@
 </template>
 
 <script>
+import BurgersHeat from './components/parameters/BurgersHeat.vue';
+import M6Linear from './components/parameters/M6Linear.vue';
+import NSLinear from './components/parameters/NSLinear.vue';
+
 export default {
     data() {
         return {
