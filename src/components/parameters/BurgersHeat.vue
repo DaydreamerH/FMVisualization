@@ -34,16 +34,8 @@
             </select>
           </li>
           <li>
-            <span>V值范围：</span>
-            <!-- 修改这里，去掉了 marks 属性，这样就不会显示滑动条上的值 -->
-            <el-slider
-              v-model="selectedV"
-              :min="0.2"
-              :max="4.8"
-              :step="0.2"
-              show-tooltip
-              @change="submitData"
-            />
+            <span>粘度系数 (V值)：</span>
+            <el-slider v-model="selectedV" :min="0.2" :max="4.8" :step="0.2" show-tooltip @change="submitData" />
           </li>
         </ul>
         <button @click="submitData" class="confirm">提交</button>
@@ -92,92 +84,93 @@ export default {
         (row) => parseFloat(row[2]) === selectedV
       );
 
-      const seriesData = [];
-      const timeIntervals = Math.floor(filteredData.length / 24);
+      // 提取 X 和 Y 值的唯一值
+      const xValues = [...new Set(filteredData.map((row) => row[firstParm]))].sort(
+        (a, b) => a - b
+      );
+      const yValues = [...new Set(filteredData.map((row) => row[secondParm]))].sort(
+        (a, b) => a - b
+      );
 
-      for (let i = 0; i < timeIntervals; i++) {
-        const xData = [];
-        const yData = [];
-        for (let j = i * 24; j < (i + 1) * 24; j++) {
-          const row = filteredData[j];
-          xData.push(row[firstParm]); // 横轴
-          yData.push(row[secondParm]); // 纵轴
+      // 创建 Z 值的网格
+      const zGrid = yValues.map(() => new Array(xValues.length).fill(0));
+
+      // 填充 Z 值
+      filteredData.forEach((row) => {
+        const xIndex = xValues.indexOf(row[firstParm]);
+        const yIndex = yValues.indexOf(row[secondParm]);
+        if (xIndex !== -1 && yIndex !== -1) {
+          zGrid[yIndex][xIndex] = row[3]; // 假设 U 值存储在第四列
         }
-        seriesData.push({
-          name: `t=${((i + 1) * 0.2).toFixed(2)}`, 
-          type: 'line',
-          data: yData,
-          symbol: 'circle',
-          label: {
-            show: false,
-          },
-        });
-      }
+      });
 
-      // 检查并清理已经存在的 ECharts 实例
-      const chartDom = document.getElementById('chart');
+      // 将网格数据转化为 ECharts 的热力图数据格式
+      const heatmapData = [];
+      zGrid.forEach((row, i) => {
+        row.forEach((value, j) => {
+          heatmapData.push([xValues[j], yValues[i], value]);
+        });
+      });
+
+      // 设置 ECharts 配置项
+      const chartDom = document.getElementById("chart");
       if (echarts.getInstanceByDom(chartDom)) {
         echarts.dispose(chartDom); // 销毁已存在的实例
       }
 
-      // 初始化新的 ECharts 图表
       const chart = echarts.init(chartDom);
       const option = {
         title: {
           text: `Burgers 方程: ${['T', 'X', 'V', 'U'][firstParm]} 与 ${['T', 'X', 'V', 'U'][secondParm]} 的关系`,
         },
         tooltip: {
-          trigger: 'axis',
+          position: "top",
           formatter: (params) => {
-            const time = ((params[0].dataIndex + 1) * 0.2).toFixed(2);
-            const value = params[0].value;
-            return `t=${time}<br/>${['T', 'X', 'V', 'U'][firstParm]}: ${value}`;
-          },
-        },
-        legend: {
-          data: seriesData.map((item) => item.name),
-          top: '15%',
-          left: '40%',
-          formatter: (name) => {
-            const time = parseFloat(name.replace('t=', ''));
-            return `t=${time.toFixed(2)}`;
+            return `${['T', 'X', 'V', 'U'][firstParm]}: ${params.data[0]}<br/>
+                ${['T', 'X', 'V', 'U'][secondParm]}: ${params.data[1]}<br/>
+                U: ${params.data[2]}`;
           },
         },
         xAxis: {
-          type: 'category',
-          data: filteredData.slice(0, 24).map((row) => row[firstParm]),
+          type: "category",
+          data: xValues,
           name: ['T', 'X', 'V', 'U'][firstParm],
         },
         yAxis: {
-          type: 'value',
+          type: "category",
+          data: yValues,
           name: ['T', 'X', 'V', 'U'][secondParm],
         },
-        series: seriesData,
-
-        // 支持缩放和平移功能
-        dataZoom: [
-          {
-            type: 'inside', // 允许通过鼠标拖拽图表来平移
-            xAxisIndex: [0],
-            start: 0,
-            end: 100,
-            zoomLock: false, // 设置缩放锁定
+        visualMap: {
+          min: Math.min(...zGrid.flat()),
+          max: Math.max(...zGrid.flat()),
+          calculable: true,
+          inRange: {
+            color: ["#FFFFFF", "#FF0000"],
           },
+        },
+        series: [
           {
-            show: true, // 添加外部缩放工具栏
-            type: 'slider',
-            xAxisIndex: [0],
-            start: 0,
-            end: 100,
+            name: "U 值",
+            type: "heatmap",
+            data: heatmapData,
+            emphasis: {
+              itemStyle: {
+                borderColor: "#333",
+                borderWidth: 1,
+              },
+            },
           },
         ],
       };
 
       chart.setOption(option);
-    },
+    }
+    ,
   },
 };
 </script>
+
 
 <style scoped>
 .burgers-liner {
