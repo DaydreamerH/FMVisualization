@@ -22,7 +22,8 @@
                             <!-- <M6Linear></M6Linear> -->
                              <!-- <NACALinear></NACALinear> -->
                               <!-- <CASTLinear></CASTLinear> -->
-                              <FusionScatter></FusionScatter>
+                              <!-- <FusionScatter></FusionScatter> -->
+                               <Fusion3DScatter></Fusion3DScatter>
                     </div>
                 </el-main>
             </el-container>
@@ -31,7 +32,6 @@
 </template>
 
 <script>
-import FusionScatter from './components/parameters/FusionScatter.vue';
 
 
 export default {

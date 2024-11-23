@@ -12,6 +12,7 @@ import NACALinear from './components/parameters/NACALinear.vue';
 import CASTLinear from './components/parameters/CASTLinear.vue';
 import MainMenu from './components/MainMenu.vue';        
 import FusionScatter from './components/parameters/FusionScatter.vue';
+import Fusion3DScatter from './components/parameters/Fusion3DScatter.vue';
 const app = createApp(App);
 
 // 全局注册组件
@@ -24,5 +25,6 @@ app.component('M6Linear', M6Linear);
 app.component('NACALinear', NACALinear);
 app.component('CASTLinear', CASTLinear);
 app.component('FusionScatter', FusionScatter);
+app.component('Fusion3DScatter', Fusion3DScatter);
 app.use(ElementPlus)
 app.mount('#app')

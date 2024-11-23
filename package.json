@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "echarts": "^5.5.1",
+    "echarts-gl": "^2.0.9",
     "element-plus": "^2.8.8",
     "fmvisualization": "file:",
     "less": "^4.2.0",
