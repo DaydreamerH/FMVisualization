@@ -20,7 +20,9 @@
                           <!-- <NSLinear></NSLinear> -->
                            <!-- <NSHeat></NSHeat> -->
                             <!-- <M6Linear></M6Linear> -->
-                             <NACALinear></NACALinear>
+                             <!-- <NACALinear></NACALinear> -->
+                              <!-- <CASTLinear></CASTLinear> -->
+                              <FusionScatter></FusionScatter>
                     </div>
                 </el-main>
             </el-container>
@@ -29,7 +31,8 @@
 </template>
 
 <script>
-import NACALinear from './components/parameters/NACALinear.vue';
+import FusionScatter from './components/parameters/FusionScatter.vue';
+
 
 export default {
     data() {

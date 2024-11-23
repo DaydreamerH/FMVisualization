@@ -9,8 +9,9 @@ import NSLinear from './components/parameters/NSLinear.vue';
 import NSHeat from './components/parameters/NSHeat.vue';
 import M6Linear from './components/parameters/M6Linear.vue';
 import NACALinear from './components/parameters/NACALinear.vue';
+import CASTLinear from './components/parameters/CASTLinear.vue';
 import MainMenu from './components/MainMenu.vue';        
-
+import FusionScatter from './components/parameters/FusionScatter.vue';
 const app = createApp(App);
 
 // 全局注册组件
@@ -21,5 +22,7 @@ app.component('NSLinear', NSLinear);
 app.component('NSHeat', NSHeat);
 app.component('M6Linear', M6Linear);
 app.component('NACALinear', NACALinear);
+app.component('CASTLinear', CASTLinear);
+app.component('FusionScatter', FusionScatter);
 app.use(ElementPlus)
 app.mount('#app')
