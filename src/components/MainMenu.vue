@@ -15,8 +15,8 @@
 </template>
 
 <script>
-export default{
-    data(){
+export default {
+    data() {
         return {
             menus: [
                 {
@@ -33,7 +33,6 @@ export default{
                     children: [
                         { title: "折线图", action: "NL" },
                         { title: "等高线图", action: "NC" },
-                        { title: "场图", action: "NF" },
                     ],
                 },
                 {
@@ -60,16 +59,13 @@ export default{
                     ],
                 },
             ],
-        }
+        };
     },
     methods: {
+        // 将点击的菜单项 action 值传递到父组件
         handleMenuClick(item) {
-            console.log(`Menu clicked: ${item.action}`);
-            // TODO: 根据 `action` 值切换到相应的功能或调用后端接口。
+            this.$emit("menu-action", item.action);
         },
     },
-}
+};
 </script>
-
-<style>
-</style>
