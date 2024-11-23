@@ -24,7 +24,7 @@ export default{
                     icon: "el-icon-s-grid",
                     children: [
                         { title: "折线图", action: "BL" },
-                        { title: "热力图", action: "BH" },
+                        { title: "等高线图", action: "BC" },
                     ],
                 },
                 {
@@ -32,7 +32,7 @@ export default{
                     icon: "el-icon-s-data",
                     children: [
                         { title: "折线图", action: "NL" },
-                        { title: "热力图", action: "NH" },
+                        { title: "等高线图", action: "NC" },
                         { title: "场图", action: "NF" },
                     ],
                 },
@@ -55,8 +55,8 @@ export default{
                     title: "气动数据融合",
                     icon: "el-icon-s-cooperation",
                     children: [
-                        { title: "折线图", action: "FL" },
-                        { title: "3维图", action: "F3D" },
+                        { title: "散点图", action: "FS" },
+                        { title: "3维散点图", action: "F3DS" },
                     ],
                 },
             ],
