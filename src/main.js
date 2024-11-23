@@ -8,6 +8,7 @@ import BurgersHeat from './components/parameters/BurgersHeat.vue';
 import NSLinear from './components/parameters/NSLinear.vue';
 import NSHeat from './components/parameters/NSHeat.vue';
 import M6Linear from './components/parameters/M6Linear.vue';
+import NACALinear from './components/parameters/NACALinear.vue';
 import MainMenu from './components/MainMenu.vue';        
 
 const app = createApp(App);
@@ -19,5 +20,6 @@ app.component('BurgersHeat', BurgersHeat);
 app.component('NSLinear', NSLinear);
 app.component('NSHeat', NSHeat);
 app.component('M6Linear', M6Linear);
+app.component('NACALinear', NACALinear);
 app.use(ElementPlus)
 app.mount('#app')

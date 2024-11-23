@@ -19,7 +19,8 @@
                          <!-- <BurgersHeat></BurgersHeat> -->
                           <!-- <NSLinear></NSLinear> -->
                            <!-- <NSHeat></NSHeat> -->
-                            <M6Linear></M6Linear>
+                            <!-- <M6Linear></M6Linear> -->
+                             <NACALinear></NACALinear>
                     </div>
                 </el-main>
             </el-container>
@@ -28,9 +29,7 @@
 </template>
 
 <script>
-import BurgersHeat from './components/parameters/BurgersHeat.vue';
-import M6Linear from './components/parameters/M6Linear.vue';
-import NSLinear from './components/parameters/NSLinear.vue';
+import NACALinear from './components/parameters/NACALinear.vue';
 
 export default {
     data() {
