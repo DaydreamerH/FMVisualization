@@ -30,7 +30,6 @@ import { markRaw } from 'vue';
 import BurgersLinear from './components/parameters/BurgersLinear.vue'; 
 import BurgersContour from './components/parameters/BurgersContour.vue';
 import NSLinear from './components/parameters/NSLinear.vue';
-import NSContour from './components/parameters/NSContour.vue';
 import M6Linear from './components/parameters/M6Linear.vue';
 import NACALinear from './components/parameters/NACALinear.vue';
 import CASTLinear from './components/parameters/CASTLinear.vue';
@@ -47,7 +46,6 @@ export default {
                 BL: markRaw(BurgersLinear),
                 BC: markRaw(BurgersContour),
                 NL: markRaw(NSLinear),
-                NC: markRaw(NSContour),
                 ML: markRaw(M6Linear),
                 NAL: markRaw(NACALinear),
                 CL: markRaw(CASTLinear),
@@ -57,11 +55,10 @@ export default {
         };
     },
     components: {
-        MainMenu, // 主菜单
+        MainMenu, 
         BurgersLinear,
         BurgersContour,
         NSLinear,
-        NSContour,
         M6Linear,
         NACALinear,
         CASTLinear,

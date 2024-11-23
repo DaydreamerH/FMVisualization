@@ -32,7 +32,6 @@ export default {
                     icon: "el-icon-s-data",
                     children: [
                         { title: "折线图", action: "NL" },
-                        { title: "等高线图", action: "NC" },
                     ],
                 },
                 {
