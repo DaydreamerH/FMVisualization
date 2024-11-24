@@ -4,7 +4,7 @@
     <div class="content">
       <!-- 左侧：图表展示 -->
       <div class="chart-container">
-        <div class="chart-title">Burgers方程折线图</div> <!-- 添加标题 -->
+        <div class="chart-title">Burgers方程折线图</div>
         <div id="chart" style="height: 100%;"></div>
       </div>
 
@@ -83,11 +83,6 @@ export default {
       selectedV: 0.2, // 默认选中的 V 值
       fileName: '', // 存储上传文件名
     };
-  },
-  computed: {
-    formattedFileContent() {
-      return this.fileContent.join('\n'); // 格式化文件内容
-    },
   },
   methods: {
     // 处理文件选择和读取
