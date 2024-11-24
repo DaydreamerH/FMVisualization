@@ -227,6 +227,7 @@ export default {
 }
 
 .chart-container {
+  flex: 3;
   padding: 20px;
   background-color: #ffffff;
   border: 1px solid #dcdfe6;
