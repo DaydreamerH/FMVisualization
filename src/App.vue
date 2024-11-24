@@ -13,7 +13,7 @@
                     <MainMenu @menu-action="handleMenuAction" />
                 </el-aside>
                 <!-- Main Content 区域 -->
-                <el-main style="padding: 20px; background-color: #ffffff; flex-grow: 1;">
+                <el-main style="padding: 10px; background-color: #ffffff; flex-grow: 1;">
                     <div class="content">
                         <!-- 动态组件，根据 activeModule 动态加载对应组件 -->
                         <component :is="activeModuleMap[activeModule]" />
