@@ -169,7 +169,7 @@ export default {
         legend: {
           data: seriesData.map((item) => item.name),
           top: '15%',
-          left: '40%',
+          left: '50%',
           formatter: (name) => {
             const time = parseFloat(name.replace('t=', ''));
             return `t=${time.toFixed(2)}`;
