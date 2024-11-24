@@ -21,7 +21,7 @@
             :auto-upload="false"
           >
             <i class="el-icon-upload"></i>
-            <div>拖拽文件到这里，或点击上传</div>
+            <div>选择数据文件</div>
           </el-upload>
         </div>
         
