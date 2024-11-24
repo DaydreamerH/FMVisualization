@@ -4,45 +4,56 @@
     <div class="content">
       <!-- 左侧：图表展示 -->
       <div class="chart-container">
-        <div id="plotly-chart" style="height: 100%;"></div>
+        <div class="chart-title">Burgers方程等高线图</div>
+        <div id="plotly-chart" style="height: 94%;top:3%;position: relative"></div>
       </div>
 
       <!-- 右侧：参数设置 -->
       <div class="parameters">
         <h3>参数设置</h3>
         <div class="file-choose">
-          <input id="BLupload-input" type="file" accept=".txt" @change="handleFileChange" class="file-input" />
-          <div class="f-button">选择数据文件</div>
+          <el-upload class="upload-demo" drag accept=".txt" :on-change="handleFileChange" :show-file-list="false"
+            :auto-upload="false">
+            <i class="el-icon-upload"></i>
+            <div>选择数据文件</div>
+          </el-upload>
+        </div>
+        <div class="uploaded-content" v-if="fileName">
+          <h4>已选择文件：{{ fileName }}</h4>
         </div>
         <ul class="data">
           <li>
             <span>第一维度列：</span>
-            <select v-model="firstParm">
-              <option value="0">0(T)</option>
-              <option value="1">1(X)</option>
-              <option value="2">2(V)</option>
-              <option value="3">3(U)</option>
-            </select>
+            <el-select v-model="firstParm" placeholder="选择维度" style="width: 50%;;position: relative;margin-top: 5px;">
+              <el-option label="T" value="0"></el-option>
+              <el-option label="X" value="1"></el-option>
+              <el-option label="V" value="2"></el-option>
+              <el-option label="U" value="3"></el-option>
+            </el-select>
           </li>
           <li>
             <span>第二维度列：</span>
-            <select v-model="secondParm">
-              <option value="0">0(T)</option>
-              <option value="1">1(X)</option>
-              <option value="2">2(V)</option>
-              <option value="3">3(U)</option>
-            </select>
+            <el-select v-model="secondParm" placeholder="选择维度" style="width: 50%;position: relative;margin-top: 5px;">
+              <el-option label="T" value="0"></el-option>
+              <el-option label="X" value="1"></el-option>
+              <el-option label="V" value="2"></el-option>
+              <el-option label="U" value="3"></el-option>
+            </el-select>
           </li>
           <li>
-            <span>粘度系数 (V值)：</span>
-            <el-slider v-model="selectedV" :min="0.2" :max="4.8" :step="0.2" show-tooltip @change="submitData" />
+            <span>V值范围：</span>
+            <el-slider v-model="selectedV" :min="0.2" :max="4.8" :step="0.2" show-tooltip @change="changeVOrLevels"
+              style="left:7%;position: relative;margin-top: 5px;width: 60%;" />
           </li>
           <li>
             <span>等高线级数：</span>
-            <el-slider v-model="contourLevels" :min="5" :max="50" :step="1" show-tooltip @change="submitData" />
+            <el-slider v-model="contourLevels" :min="5" :max="50" :step="1" show-tooltip @change="changeVOrLevels" 
+              style="left:0.5%;position: relative;margin-top: 5px;width: 60%;" />
           </li>
         </ul>
-        <button @click="submitData" class="confirm">提交</button>
+        <div class="button-container">
+          <el-button type="primary" @click="submitData" class="confirm">提交</el-button> <!-- 提交按钮 -->
+        </div>
       </div>
     </div>
   </div>
@@ -65,22 +76,38 @@ export default {
       fileContent: [], // 用于存储文件数据
       selectedV: 0.2, // 默认选中的 V 值
       contourLevels: 10, // 默认等高线级数（通过滑块控制）
+      fileName: '', // 存储文件名
     };
   },
   methods: {
     // 处理文件选择和读取
-    handleFileChange(event) {
-      const file = event.target.files[0];
+    handleFileChange(file) {
+      this.fileName = file.name; // 存储文件名
       const reader = new FileReader();
       reader.onload = (e) => {
         const lines = e.target.result.split('\n');
         this.fileContent = lines.map((line) => line.trim().split(/\s+/));
       };
-      reader.readAsText(file);
+      reader.readAsText(file.raw);
     },
-
+    changeVOrLevels() {
+      if (this.fileName === '' || this.firstParm === null || this.secondParm === null) {
+        return;
+      }
+      this.submitData();
+    },
     // 提交数据并绘制图表
     submitData() {
+      if (this.fileName === '') {
+        this.$message.error('请先上传文件!');
+        return;
+      }
+
+      if (this.firstParm === null || this.secondParm === null) {
+        this.$message.error('请先选择维度!');
+        return;
+      }
+
       const firstParm = parseInt(this.firstParm);
       const secondParm = parseInt(this.secondParm);
       const selectedV = this.selectedV;
@@ -143,7 +170,6 @@ export default {
 
       // 配置布局
       const layout = {
-        title: `Burgers 方程: ${['T', 'X', 'V', 'U'][firstParm]} 与 ${['T', 'X', 'V', 'U'][secondParm]} 的关系`,
         xaxis: {
           title: ['T', 'X', 'V', 'U'][firstParm],
         },
@@ -172,8 +198,15 @@ export default {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  max-width: 1200px;
   height: 100%;
+}
+
+.chart-title {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .chart-container {
@@ -183,12 +216,14 @@ export default {
   border: 1px solid #dcdfe6;
   border-radius: 8px;
   height: auto;
+  position: relative;
 }
 
 .parameters {
   flex: 1;
   margin-left: 20px;
   padding: 20px;
+  padding-top: 0px;
   background-color: #f9f9f9;
   border: 1px solid #dcdfe6;
   border-radius: 8px;
@@ -204,7 +239,9 @@ export default {
   position: relative;
   margin-bottom: 20px;
 }
-
+.uploaded-content {
+  margin: 20px 0;
+}
 .file-input {
   position: absolute;
   top: 0;
@@ -214,36 +251,26 @@ export default {
   opacity: 0;
 }
 
-.f-button {
-  width: 100%;
-  height: 40px;
-  background-color: #409eff;
-  text-align: center;
-  line-height: 40px;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
+.data {
+  list-style: none;
+  padding: 0;
 }
 
+
 .data li {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  width: 100%;
   display: flex;
   align-items: center;
 }
 
-.data li span {
-  width: 120px;
-  font-weight: bold;
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .confirm {
-  width: 100%;
-  padding: 10px 0;
-  background-color: #409eff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+  width: 50%;
 }
 </style>
