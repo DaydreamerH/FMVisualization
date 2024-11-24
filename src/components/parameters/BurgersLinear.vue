@@ -51,7 +51,7 @@
           </li>
           <li>
             <span>V值范围：</span>
-            <el-slider v-model="selectedV" :min="0.2" :max="4.8" :step="0.2" show-tooltip @change="changeV" style="position: relative;margin-top: 5px;width: 60%;" />
+            <el-slider v-model="selectedV" :min="0.2" :max="4.8" :step="0.2" show-tooltip @change="changeV" style="left:10%;position: relative;margin-top: 5px;width: 60%;" />
           </li>
         </ul>
         <div class="button-container">
