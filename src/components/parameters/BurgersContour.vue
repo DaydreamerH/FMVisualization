@@ -264,6 +264,10 @@ export default {
   align-items: center;
 }
 
+.data li span {
+  font-weight: bold;
+}
+
 .button-container {
   display: flex;
   justify-content: center;

@@ -279,6 +279,7 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
+  font-weight: bold;
 }
 
 .button-container {
