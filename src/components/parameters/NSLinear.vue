@@ -1,41 +1,49 @@
 <template>
-    <div class="ns-linear">
-        <div class="content">
-            <!-- 左侧：图表展示 -->
-            <div class="chart-container">
-                <div id="chart" style="height: 100%;"></div>
-            </div>
+  <div class="ns-linear">
+    <div class="content">
+      <!-- 左侧：图表展示 -->
+      <div class="chart-container">
+        <div class="chart-title">NS方程折线图</div>
+        <div id="chart" style="height: 100%;"></div>
+      </div>
 
-            <!-- 右侧：参数设置 -->
-            <div class="parameters">
-                <h3>参数设置</h3>
-                <div class="file-choose">
-                    <input id="NSupload-input" type="file" accept=".csv,.dat" @change="handleFileChange"
-                        class="file-input" />
-                    <div class="f-button">选择数据文件</div>
-                </div>
-                <ul class="data">
-                    <li>
-                        <span>第一维度列：</span>
-                        <select v-model="firstParm">
-                            <option v-for="(name, index) in columnNames" :key="index" :value="index">
-                                {{ index }} ({{ name }})
-                            </option>
-                        </select>
-                    </li>
-                    <li>
-                        <span>第二维度列：</span>
-                        <select v-model="secondParm">
-                            <option v-for="(name, index) in columnNames" :key="index" :value="index">
-                                {{ index }} ({{ name }})
-                            </option>
-                        </select>
-                    </li>
-                </ul>
-                <button @click="submitData" class="confirm">提交</button>
-            </div>
+      <!-- 右侧：参数设置 -->
+      <div class="parameters">
+        <h3>参数设置</h3>
+        <div class="file-choose">
+          <el-upload class="upload-demo" drag accept=".csv,.dat" :on-change="handleFileChange" :show-file-list="false"
+            :auto-upload="false">
+            <i class="el-icon-upload"></i>
+            <div>选择数据文件</div>
+          </el-upload>
         </div>
+        <div class="uploaded-content" v-if="fileName">
+          <h4>已选择文件：{{ fileName }}</h4>
+        </div>
+        <ul class="data">
+          <li>
+            <span>第一维度列：</span>
+            <el-select v-model="firstParm" placeholder="选择维度" style="width: 50%;;position: relative;margin-top: 5px;">
+              <el-option v-for="(name, index) in columnNames" :key="index" :value="index" :label="name">
+                {{ index }} ({{ name }})
+              </el-option>
+            </el-select>
+          </li>
+          <li>
+            <span>第二维度列：</span>
+            <el-select v-model="secondParm" placeholder="选择维度" style="width: 50%;;position: relative;margin-top: 5px;">
+              <el-option v-for="(name, index) in columnNames" :key="index" :value="index" :label="name">
+                {{ index }} ({{ name }})
+              </el-option>
+            </el-select>
+          </li>
+        </ul>
+        <div class="button-container">
+          <el-button type="primary" @click="submitData" class="confirm">提交</el-button> <!-- 提交按钮 -->
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -51,25 +59,30 @@ export default {
       columnNames: [], // 动态列名
       firstParm: null, // 默认第一维度列
       secondParm: null, // 默认第二维度列
+      fileName: "", // 存储上传文件名
     };
   },
   methods: {
     // 处理文件选择和读取
-    handleFileChange(event) {
-      const file = event.target.files[0];
-      const extension = file.name.split(".").pop().toLowerCase();
+    handleFileChange(file) {
+      this.fileName = file.name;
+      const extension = file.name.split(".").pop().toLowerCase(); // 获取文件扩展名
       this.fileType = extension;
 
       const reader = new FileReader();
       reader.onload = (e) => {
+        const fileContent = e.target.result; // 文件内容
         if (extension === "csv") {
-          this.handleCsv(e.target.result);
+          this.handleCsv(fileContent); // 处理 CSV 文件
         } else if (extension === "dat") {
-          this.handleDat(e.target.result);
+          this.handleDat(fileContent); // 处理 DAT 文件
+        } else {
+          this.$message.error("不支持的文件格式，请上传 CSV 或 DAT 文件");
         }
       };
-      reader.readAsText(file);
+      reader.readAsText(file.raw); // 使用 el-upload 提供的 `file.raw` 读取文件内容
     },
+
 
     // 处理 CSV 文件
     handleCsv(content) {
@@ -125,6 +138,17 @@ export default {
 
     // 提交数据并绘制图表
     submitData() {
+      if(this.fileName === ''){
+        this.$message.error('请先上传文件!');
+        return;
+      }
+
+      if(this.firstParm === null || this.secondParm === null){
+        this.$message.error('请先选择维度!');
+        return;
+      }
+
+
       const firstParm = parseInt(this.firstParm);
       const secondParm = parseInt(this.secondParm);
 
@@ -144,9 +168,6 @@ export default {
       // 初始化新图表
       const chart = echarts.init(chartDom);
       const option = {
-        title: {
-          text: `NS 方程: ${this.columnNames[firstParm]} 与 ${this.columnNames[secondParm]} 的关系`,
-        },
         xAxis: {
           type: "value",
           name: this.columnNames[firstParm],
@@ -194,88 +215,100 @@ export default {
 
 <style scoped>
 .ns-linear {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
 }
 
 .content {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 1200px;
-    height: 100%;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-title {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .chart-container {
-    flex: 3;
-    padding: 20px;
-    background-color: #ffffff;
-    border: 1px solid #dcdfe6;
-    border-radius: 8px;
-    height: auto;
+  flex: 3;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  height: auto;
+  position: relative;
 }
 
 .parameters {
-    flex: 1;
-    margin-left: 20px;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border: 1px solid #dcdfe6;
-    border-radius: 8px;
+  flex: 1;
+  margin-left: 20px;
+  padding: 20px;
+  padding-top: 0px;
+  background-color: #f9f9f9;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
 }
 
 .parameters h3 {
-    margin-bottom: 20px;
-    font-size: 18px;
-    font-weight: bold;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .file-choose {
-    position: relative;
-    margin-bottom: 20px;
+  position: relative;
+  margin-bottom: 20px;
 }
 
 .file-input {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    opacity: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+}
+
+.uploaded-content {
+  margin: 20px 0;
 }
 
 .f-button {
-    width: 100%;
-    height: 40px;
-    background-color: #409eff;
-    text-align: center;
-    line-height: 40px;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
+  width: 100%;
+  height: 40px;
+  background-color: #409eff;
+  text-align: center;
+  line-height: 40px;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .data li {
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
 }
 
 .data li span {
-    width: 120px;
-    font-weight: bold;
+  width: 120px;
+  font-weight: bold;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center; 
+  margin-top: 20px; 
 }
 
 .confirm {
-    width: 100%;
-    padding: 10px 0;
-    background-color: #409eff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
+  width: 50%;
 }
 </style>
