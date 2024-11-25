@@ -1,52 +1,60 @@
 <template>
     <div class="burgers-liner">
         <div class="content">
-            <!-- 左侧：图表展示 -->
             <div class="chart-container">
-                <div id="chart" style="height: 100%;"></div>
+                <div class="chart-title">气动数据融合3D散点图</div>
+                <div id="chart" style="height: 94%; top:3%"></div>
             </div>
 
-            <!-- 右侧：参数设置 -->
             <div class="parameters">
                 <h3>参数设置</h3>
 
-                <!-- 文件上传 -->
-                <div class="file-choose" v-for="(file, index) in fileInputs" :key="index">
-                    <input :id="'upload-input-' + index" type="file" accept=".txt" @change="handleFileChange(index)"
-                        class="file-input" />
-                    <div class="f-button">{{ file.label }}</div>
+                <div class="file-choose">
+                    <div v-for="(file, index) in fileInputs" :key="index" class="file-container">
+                        <div class="file-label">{{ file.label }}:</div>
+                        <div v-if="file.name" class="file-name">{{ file.name }}</div>
+                        <el-upload class="upload-demo" :auto-upload="false"
+                            :on-change="(file) => handleFileChange(index, file)" :show-file-list="false" accept=".txt">
+                            <el-button size="small" type="primary">
+                                {{ file.name ? '重新上传' : '点击上传' }}
+                            </el-button>
+                        </el-upload>
+                    </div>
                 </div>
 
-                <!-- 参数选择 -->
                 <ul class="data">
                     <li>
                         <span>第一维度列：</span>
-                        <select v-model="firstParm">
-                            <option v-for="(option, index) in firstDimensionOptions" :key="index" :value="index">
+                        <el-select v-model="firstParm" style="width: 50%;">
+                            <el-option v-for="(option, index) in firstDimensionOptions" :key="index" :value="index"
+                                :label="option">
                                 {{ option }}
-                            </option>
-                        </select>
+                            </el-option>
+                        </el-select>
                     </li>
                     <li>
                         <span>第二维度列：</span>
-                        <select v-model="secondParm">
-                            <option v-for="(option, index) in secondDimensionOptions" :key="index" :value="index">
+                        <el-select v-model="secondParm" style="width: 50%;">
+                            <el-option v-for="(option, index) in secondDimensionOptions" :key="index" :value="index"
+                                :label="option">
                                 {{ option }}
-                            </option>
-                        </select>
+                            </el-option>
+                        </el-select>
                     </li>
                     <li>
                         <span>第三维度列：</span>
-                        <select v-model="thirdParm">
-                            <option v-for="(option, index) in secondDimensionOptions" :key="index" :value="index">
+                        <el-select v-model="thirdParm" style="width: 50%;">
+                            <el-option v-for="(option, index) in secondDimensionOptions" :key="index" :value="index"
+                                :label="option">
                                 {{ option }}
-                            </option>
-                        </select>
+                            </el-option>
+                        </el-select>
                     </li>
                 </ul>
 
-                <!-- 提交按钮 -->
-                <button @click="submitData" class="confirm">提交</button>
+                <div class="button-container">
+                    <el-button type="primary" @click="submitData" class="confirm">提交</el-button>
+                </div>
             </div>
         </div>
     </div>
@@ -60,32 +68,45 @@ export default {
         return {
             // 文件输入配置
             fileInputs: [
-                { label: '选择数值计算文件', content: [] },
-                { label: '选择飞行试验文件', content: [] },
-                { label: '选择融合数据文件', content: [] },
+                { label: '数值计算文件', content: [] },
+                { label: '飞行试验文件', content: [] },
+                { label: '融合数据文件', content: [] },
             ],
             // 参数选择
-            firstParm: 0,
-            secondParm: 1,
-            thirdParm: 2,
+            firstParm: null,
+            secondParm: null,
+            thirdParm: null,
             firstDimensionOptions: ['来流马赫数', '总攻角', '气动转滚轮', '滚转舵偏', '俯仰舵偏', '偏航舵篇'],
-            secondDimensionOptions: ['轴向力系数', '法向力系数', '侧向力系数', '滚转力矩系数', '俯仰力矩系数', '偏航力矩系数']
+            secondDimensionOptions: ['轴向力系数', '法向力系数', '侧向力系数', '滚转力矩系数', '俯仰力矩系数', '偏航力矩系数'],
+            fileName:[]
         };
     },
     methods: {
         // 处理文件变化
-        handleFileChange(index) {
-            const file = event.target.files[0];
+        handleFileChange(index, file) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const lines = e.target.result.split('\n');
                 this.fileInputs[index].content = lines.map((line) => line.trim().split(/\s+/));
             };
-            reader.readAsText(file);
+
+            if (file.raw) {
+                this.fileInputs[index].name = file.name;  // 更新文件名
+                reader.readAsText(file.raw);
+            }
         },
 
         // 提交数据并绘制图表
         submitData() {
+            if(this.fileInputs[0].content.length == 0 || this.fileInputs[1].content.length == 0 || this.fileInputs[2].content.length == 0){
+                this.$message.error('请上传文件')
+                return
+            }
+
+            if(this.firstParm == null || this.secondParm == null || this.thirdParm == null){
+                this.$message.error('请选择参数')
+                return
+            }
             // 第一维度长度
             const firstDimensionLength = 6;
 
@@ -166,12 +187,10 @@ export default {
 
             chart.setOption(option);
         }
-
-
-
     },
 };
 </script>
+
 <style scoped>
 .burgers-liner {
     display: flex;
@@ -184,7 +203,6 @@ export default {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 1200px;
     height: 100%;
 }
 
@@ -195,12 +213,22 @@ export default {
     border: 1px solid #dcdfe6;
     border-radius: 8px;
     height: auto;
+    position: relative;
+}
+
+.chart-title {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 24px;
+    font-weight: bold;
 }
 
 .parameters {
     flex: 1;
     margin-left: 20px;
     padding: 20px;
+    padding-top: 0px;
     background-color: #f9f9f9;
     border: 1px solid #dcdfe6;
     border-radius: 8px;
@@ -211,34 +239,45 @@ export default {
     margin-bottom: 20px;
 }
 
-.file-input {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    opacity: 0;
+.file-label {
+    width: 120px;
+    font-weight: bold;
 }
 
-.f-button {
-    width: 100%;
-    height: 40px;
-    background-color: #409eff;
-    text-align: center;
-    line-height: 40px;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
+.file-name {
+  margin-right: 10px;
+  color: #555;
+}
+
+.file-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.data {
+    list-style: none;
+    padding: 0;
+}
+
+.data li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.data li span {
+    width: 120px;
+    font-weight: bold;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 
 .confirm {
-    width: 100%;
-    padding: 10px 0;
-    background-color: #409eff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
+    width: 50%;
 }
 </style>
