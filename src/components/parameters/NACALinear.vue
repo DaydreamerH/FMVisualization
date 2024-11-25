@@ -4,41 +4,50 @@
         <div class="content">
             <!-- 左侧：图表展示 -->
             <div class="chart-container">
-                <div id="scatter-chart" style="height: 45%;"></div>
-                <div id="line-chart" style="height: 45%;"></div>
+                <div class="chart-title">NACA翼型</div>
+                <div id="scatter-chart" style="height: 45%;position: relative; top:5%;"></div>
+                <div id="line-chart" style="height: 45%;position: relative; top:5%;"></div>
             </div>
 
             <!-- 右侧：参数设置 -->
             <div class="parameters">
                 <h3>参数设置</h3>
                 <div class="file-choose">
-                    <input id="NALupload-input" type="file" accept=".txt" @change="handleFileChange"
-                        class="file-input" />
-                    <div class="f-button">选择数据文件</div>
+                    <el-upload class="upload-demo" drag accept=".txt" :on-change="handleFileChange"
+                        :show-file-list="false" :auto-upload="false">
+                        <i class="el-icon-upload"></i>
+                        <div>选择数据文件</div>
+                    </el-upload>
+                </div>
+                <div class="uploaded-content" v-if="fileName">
+                    <h4>已选择文件：{{ fileName }}</h4>
                 </div>
                 <ul class="data">
                     <li>
                         <span>翼型序号：</span>
-                        <input v-model.number="planeID" type="number" min="0" max="111" class="input-number" />
+                        <el-input v-model.number="planeID" type="number" min="1" max="111" class="input-number"
+                            style="width:50%;" />
                     </li>
                     <li>
                         <span>第一维度列：</span>
-                        <select v-model="firstParm">
-                            <option value="0">0(Alpha)</option>
-                            <option value="1">1(CD)</option>
-                            <option value="2">2(CL)</option>
-                        </select>
+                        <el-select v-model="firstParm" style="width: 50%;" placeholder="选择维度">
+                            <el-option label="Alpha" value="0"></el-option>
+                            <el-option label="CD" value="1"></el-option>
+                            <el-option label="CL" value="2"></el-option>
+                        </el-select>
                     </li>
                     <li>
                         <span>第二维度列：</span>
-                        <select v-model="secondParm">
-                            <option value="0">0(Alpha)</option>
-                            <option value="1">1(CD)</option>
-                            <option value="2">2(CL)</option>
-                        </select>
+                        <el-select v-model="secondParm" style="width: 50%;" placeholder="选择维度">
+                            <el-option label="Alpha" value="0"></el-option>
+                            <el-option label="CD" value="1"></el-option>
+                            <el-option label="CL" value="2"></el-option>
+                        </el-select>
                     </li>
                 </ul>
-                <button @click="submitData" class="confirm">提交</button>
+                <div class="button-container">
+                    <el-button type="primary" @click="submitData" class="confirm">提交</el-button> <!-- 提交按钮 -->
+                </div>
             </div>
         </div>
     </div>
@@ -51,26 +60,44 @@ export default {
     name: 'NACALiner',
     data() {
         return {
-            planeID: 0, // 翼型序号
-            firstParm: '0', // 第一维度列
-            secondParm: '1', // 第二维度列
+            planeID: 1, // 翼型序号
+            firstParm: null, // 第一维度列
+            secondParm: null, // 第二维度列
             fileContent: [], // 文件内容数据
+            fileName: ''
         };
     },
     methods: {
         // 读取文件内容
-        handleFileChange(event) {
-            const file = event.target.files[0];
+        handleFileChange(file) {
+            this.fileName = file.name; // 存储文件名
             const reader = new FileReader();
             reader.onload = (e) => {
                 const lines = e.target.result.split('\n');
                 this.fileContent = lines.map((line) => line.trim().split(/\s+/));
             };
-            reader.readAsText(file);
+            reader.readAsText(file.raw);
         },
 
         // 绘制图表
         submitData() {
+            if (this.fileName === '') {
+                this.$message.error('请先上传文件!');
+                return;
+            }
+
+            if(this.planeID < 1 || this.planeID > 111) {
+                this.$message.error('请输入正确的翼型序号!');
+                return;
+            }
+
+            if (this.firstParm === null || this.secondParm === null) {
+                this.$message.error('请先选择维度!');
+                return;
+            }
+
+
+
             const SHAPE_DATA_LENGTH = 562;
 
             const planeID = this.planeID;
@@ -202,7 +229,6 @@ export default {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 1200px;
     height: 100%;
 }
 
@@ -213,12 +239,22 @@ export default {
     border: 1px solid #dcdfe6;
     border-radius: 8px;
     height: auto;
+    position: relative;
+}
+
+.chart-title {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 24px;
+    font-weight: bold;
 }
 
 .parameters {
     flex: 1;
     margin-left: 20px;
     padding: 20px;
+    padding-top: 0px;
     background-color: #f9f9f9;
     border: 1px solid #dcdfe6;
     border-radius: 8px;
@@ -233,6 +269,14 @@ export default {
 .file-choose {
     position: relative;
     margin-bottom: 20px;
+}
+
+.upload-demo {
+    cursor: pointer;
+}
+
+.uploaded-content {
+    margin: 20px 0;
 }
 
 .file-input {
@@ -266,14 +310,13 @@ export default {
     font-weight: bold;
 }
 
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
 .confirm {
-    width: 100%;
-    padding: 10px 0;
-    background-color: #409eff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
+    width: 50%;
 }
 </style>
