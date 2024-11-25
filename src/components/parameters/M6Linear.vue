@@ -4,45 +4,55 @@
         <div class="content">
             <!-- 左侧：图表展示 -->
             <div class="chart-container">
-                <div id="chart" style="height: 100%;"></div>
+                <div class="chart-title">M6翼型折线图</div>
+                <div id="chart" style="height: 94%; top:3%;"></div>
             </div>
 
             <!-- 右侧：参数设置 -->
             <div class="parameters">
                 <h3>参数设置</h3>
                 <div class="file-choose">
-                    <input id="BLupload-input" type="file" accept=".csv" @change="handleFileChange"
-                        class="file-input" />
-                    <div class="f-button">选择数据文件</div>
+                    <el-upload class="upload-demo" drag accept=".csv" :on-change="handleFileChange"
+                        :show-file-list="false" :auto-upload="false">
+                        <i class="el-icon-upload"></i>
+                        <div>选择数据文件</div>
+                    </el-upload>
+                </div>
+
+                <!-- 显示上传文件名 -->
+                <div class="uploaded-content" v-if="fileName">
+                    <h4>已选择文件：{{ fileName }}</h4>
                 </div>
                 <ul class="data">
                     <li>
                         <span>第一维度列：</span>
-                        <select v-model="firstParm">
-                            <option v-for="(name, index) in columnNames" :key="index" :value="index">{{ name }}</option>
-                        </select>
+                        <el-select v-model="firstParm" style="width: 50%;" placeholder="选择维度">
+                            <el-option v-for="(name, index) in columnNames" :key="index" :value="index" :label="name">{{
+                                name }}</el-option>
+                        </el-select>
                     </li>
                     <li>
                         <span>第二维度列：</span>
-                        <select v-model="secondParm">
-                            <option v-for="(name, index) in columnNames" :key="index" :value="index">{{ name }}</option>
-                        </select>
+                        <el-select v-model="secondParm" style="width: 50%;" placeholder="选择维度">
+                            <el-option v-for="(name, index) in columnNames" :key="index" :value="index" :label="name">{{
+                                name }}</el-option>
+                        </el-select>
                     </li>
                     <!-- 添加马赫数选择框 -->
                     <li>
                         <span>选择马赫数:</span>
-                        <select v-model="Ma_sample">
-                            <option v-for="(value, index) in machOptions" :key="index" :value="value">{{ value }}
-                            </option>
-                        </select>
+                        <el-select v-model="Ma_sample" style="width: 50%;" placeholder="筛选马赫数">
+                            <el-option v-for="(value, index) in machOptions" :key="index" :value="value">{{ value }}
+                            </el-option>
+                        </el-select>
                     </li>
                     <!-- 添加雷诺数选择框 -->
                     <li>
                         <span>选择雷诺数:</span>
-                        <select v-model="Re_sample">
-                            <option v-for="(value, index) in reynoldsOptions" :key="index" :value="value">{{ value }}
-                            </option>
-                        </select>
+                        <el-select v-model="Re_sample" style="width: 50%;" placeholder="筛选马赫数">
+                            <el-option v-for="(value, index) in reynoldsOptions" :key="index" :value="value">{{ value }}
+                            </el-option>
+                        </el-select>
                     </li>
                 </ul>
                 <button @click="submitData" class="confirm">提交</button>
@@ -66,18 +76,19 @@ export default {
             secondParm: null, // 默认选中的维度
             fileContent: [], // 用于存储文件数据
             columnNames: [], // 用于存储CSV文件的列名
-            Ma_sample: 0, // 默认马赫数
-            Re_sample: 0, // 默认雷诺数
+            Ma_sample: null, // 默认马赫数
+            Re_sample: null, // 默认雷诺数
             machOptions: [], // 马赫数的选择范围
             reynoldsOptions: [], // 雷诺数的选择范围
+            fileName: ''
         };
     },
     methods: {
         // 处理文件选择和读取
-        handleFileChange(event) {
-            const file = event.target.files[0];
+        handleFileChange(file) {
             // 使用 PapaParse 解析 CSV 文件
-            Papa.parse(file, {
+            this.fileName = file.name;
+            Papa.parse(file.raw, {
                 complete: (result) => {
                     // 获取文件内容
                     this.fileContent = result.data;
@@ -101,12 +112,12 @@ export default {
                     // 生成 MACH_NUMBER 和 REYNOLDS_NUMBER 的范围
                     this.machOptions = [...new Set(machNumbers)].sort((a, b) => a - b); // 排序后去重
                     this.reynoldsOptions = [...new Set(reynoldsNumbers)].sort((a, b) => a - b); // 排序后去重
-
                 },
                 header: true, // 使用第一行作为列名
                 skipEmptyLines: true, // 跳过空行
             });
         },
+
 
         // 生成范围数据，步长可调
         generateRange(min, max, step) {
@@ -126,6 +137,23 @@ export default {
 
         // 提交数据并绘制折线图
         submitData() {
+            if (this.fileName === '') {
+                this.$message.error('请先上传文件!');
+                return;
+            }
+
+            if (this.firstParm === null || this.secondParm === null) {
+                this.$message.error('请先选择维度!');
+                return;
+            }
+
+            if (this.Ma_sample === null || this.Re_sample === null) {
+                this.$message.error('请先选择马赫数和雷诺数!');
+                return;
+            }
+
+
+
             const firstParm = parseInt(this.firstParm);
             const secondParm = parseInt(this.secondParm);
 
@@ -148,7 +176,7 @@ export default {
 
             const option = {
                 title: {
-                    text: `M6模型: ${this.columnNames[firstParm]} 与 ${this.columnNames[secondParm]} 的关系`,
+                    text: `${this.columnNames[firstParm]} 与 ${this.columnNames[secondParm]} 的关系`,
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -177,6 +205,22 @@ export default {
                         },
                     },
                 ],
+                dataZoom: [
+                    {
+                        type: 'inside', // 允许通过鼠标拖拽图表来平移
+                        xAxisIndex: [0],
+                        start: 0,
+                        end: 100,
+                        zoomLock: false, // 设置缩放锁定
+                    },
+                    {
+                        show: true, // 添加外部缩放工具栏
+                        type: 'slider',
+                        xAxisIndex: [0],
+                        start: 0,
+                        end: 100,
+                    },
+                ],
             };
 
             chart.setOption(option);
@@ -199,7 +243,6 @@ export default {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 1200px;
     height: 100%;
 }
 
@@ -210,12 +253,22 @@ export default {
     border: 1px solid #dcdfe6;
     border-radius: 8px;
     height: auto;
+    position: relative;
+}
+
+.chart-title {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 24px;
+    font-weight: bold;
 }
 
 .parameters {
     flex: 1;
     margin-left: 20px;
     padding: 20px;
+    padding-top: 10px;
     background-color: #f9f9f9;
     border: 1px solid #dcdfe6;
     border-radius: 8px;
@@ -230,6 +283,10 @@ export default {
 .file-choose {
     position: relative;
     margin-bottom: 20px;
+}
+
+.uploaded-content {
+    margin: 20px 0;
 }
 
 .file-input {
