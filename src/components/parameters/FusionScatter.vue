@@ -1,5 +1,5 @@
 <template>
-    <div class="burgers-liner">
+    <div class="main-chart">
         <div class="content">
             <div class="chart-container">
                 <div class="chart-title">气动数据融合散点图</div>
@@ -25,7 +25,7 @@
                 <ul class="data">
                     <li>
                         <span>第一维度列：</span>
-                        <el-select v-model="firstParm" style="width: 50%;">
+                        <el-select v-model="firstParm" style="width: 50%;" placeholder="选择维度">
                             <el-option v-for="(option, index) in firstDimensionOptions" :key="index" :value="index"
                                 :label="option">
                                 {{ option }}
@@ -34,7 +34,7 @@
                     </li>
                     <li>
                         <span>第二维度列：</span>
-                        <el-select v-model="secondParm" style="width: 50%;">
+                        <el-select v-model="secondParm" style="width: 50%;" placeholder="选择维度">
                             <el-option v-for="(option, index) in secondDimensionOptions" :key="index" :value="index"
                                 :label="option">
                                 {{ option }}
@@ -147,52 +147,13 @@ export default {
 };
 </script>
 
+<style src="../../css/styles/drawing-tool.css"></style>
+
 <style scoped>
-.burgers-liner {
+.file-container {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    height: 100%;
-}
-
-.content {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    height: 100%;
-}
-
-.chart-container {
-    flex: 3;
-    padding: 20px;
-    background-color: #ffffff;
-    border: 1px solid #dcdfe6;
-    border-radius: 8px;
-    height: auto;
-    position: relative;
-}
-
-.chart-title {
-    position: absolute;
-    top: 10px;
-    left: 20px;
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.parameters {
-    flex: 1;
-    margin-left: 20px;
-    padding: 20px;
-    padding-top: 0px;
-    background-color: #f9f9f9;
-    border: 1px solid #dcdfe6;
-    border-radius: 8px;
-}
-
-.file-choose {
-    position: relative;
-    margin-bottom: 20px;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .file-label {
@@ -203,37 +164,5 @@ export default {
 .file-name {
   margin-right: 10px;
   color: #555;
-}
-
-.file-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.data {
-    list-style: none;
-    padding: 0;
-}
-
-.data li {
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-}
-
-.data li span {
-    width: 120px;
-    font-weight: bold;
-}
-
-.button-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.confirm {
-    width: 50%;
 }
 </style>

@@ -3,7 +3,7 @@
         <el-container style="min-height: 100vh;">
             <!-- Header 区域 -->
             <el-header
-                style="background-color: #409EFF; color: white; display: flex; align-items: center; justify-content: space-between;">
+                style="background-color: #424242; color: #F5F5F5; display: flex; align-items: center; justify-content: space-between;">
                 <h3>气动数据可视化平台</h3>
             </el-header>
             <el-container style="flex-direction: row;">

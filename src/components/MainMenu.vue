@@ -1,13 +1,13 @@
 <template>
-    <el-menu default-active="1" class="el-menu-vertical-demo" :unique-opened="true">
+    <el-menu default-active="1" class="el-menu-vertical-demo" :unique-opened="true"
+    background-color="#F5F5F5" text-color="#424242">
         <el-sub-menu :index="String(index)" v-for="(menu, index) in menus" :key="menu.title">
             <template #title>
-                <i :class="menu.icon"></i>
-                <span>{{ menu.title }}</span>
+                <span style="font-size: 18px; font-weight: bold;">{{ menu.title }}</span>
             </template>
             <el-menu-item-group>
                 <el-menu-item v-for="item in menu.children" :key="item.title" @click="handleMenuClick(item)">
-                    {{ item.title }}
+                    <span style="font-size: 15px; font-weight: bold;">{{ item.title }}</span>
                 </el-menu-item>
             </el-menu-item-group>
         </el-sub-menu>

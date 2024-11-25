@@ -1,5 +1,5 @@
 <template>
-  <div class="burgers-liner">
+  <div class="main-chart">
     <!-- 主容器 -->
     <div class="content">
       <!-- 左侧：图表展示 -->
@@ -205,90 +205,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.burgers-liner {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  height: 100%;
-  width: 100%;
-}
-
-.content {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  height: 100%;
-}
-
-.chart-container {
-  flex: 3;
-  padding: 20px;
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-  height: auto;
-  position: relative;
-}
-
-.chart-title {
-  position: absolute;
-  top: 10px;
-  left: 20px;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.parameters {
-  flex: 1;
-  margin-left: 20px;
-  padding: 20px;
-  padding-top: 0px;
-  background-color: #f9f9f9;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-}
-
-.parameters h3 {
-  margin-bottom: 20px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.file-choose {
-  position: relative;
-  margin-bottom: 20px;
-  height: auto;
-}
-
-.upload-demo {
-  cursor: pointer;
-}
-
-.uploaded-content {
-  margin: 20px 0;
-}
-
-.data {
-  list-style: none;
-  padding: 0;
-}
-
-.data li {
-  margin-bottom: 15px; 
-  width: 100%;
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center; 
-  margin-top: 20px; 
-}
-
-.confirm {
-  width: 50%;
-}
-</style>
+<style src="../../css/styles/drawing-tool.css"></style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="burgers-liner">
+  <div class="main-chart">
     <!-- 主容器 -->
     <div class="content">
       <!-- 左侧：图表展示 -->
@@ -14,7 +14,6 @@
         <div class="file-choose">
           <el-upload class="upload-demo" drag accept=".txt" :on-change="handleFileChange" :show-file-list="false"
             :auto-upload="false">
-            <i class="el-icon-upload"></i>
             <div>选择数据文件</div>
           </el-upload>
         </div>
@@ -47,7 +46,7 @@
           </li>
           <li>
             <span>等高线级数：</span>
-            <el-slider v-model="contourLevels" :min="5" :max="50" :step="1" show-tooltip @change="changeVOrLevels" 
+            <el-slider v-model="contourLevels" :min="5" :max="50" :step="1" show-tooltip @change="changeVOrLevels"
               style="left:0.5%;position: relative;margin-top: 5px;width: 60%;" />
           </li>
         </ul>
@@ -186,95 +185,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.burgers-liner {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  height: 100%;
-}
-
-.content {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  height: 100%;
-}
-
-.chart-title {
-  position: absolute;
-  top: 10px;
-  left: 20px;
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.chart-container {
-  flex: 3;
-  padding: 20px;
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-  height: auto;
-  position: relative;
-}
-
-.parameters {
-  flex: 1;
-  margin-left: 20px;
-  padding: 20px;
-  padding-top: 0px;
-  background-color: #f9f9f9;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-}
-
-.parameters h3 {
-  margin-bottom: 20px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.file-choose {
-  position: relative;
-  margin-bottom: 20px;
-}
-.uploaded-content {
-  margin: 20px 0;
-}
-.file-input {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  opacity: 0;
-}
-
-.data {
-  list-style: none;
-  padding: 0;
-}
-
-
-.data li {
-  margin-bottom: 15px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.data li span {
-  font-weight: bold;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.confirm {
-  width: 50%;
-}
-</style>
+<style src="../../css/styles/drawing-tool.css"></style>

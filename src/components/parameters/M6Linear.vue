@@ -1,5 +1,5 @@
 <template>
-    <div class="burgers-liner">
+    <div class="main-chart">
         <!-- 主容器 -->
         <div class="content">
             <!-- 左侧：图表展示 -->
@@ -40,7 +40,7 @@
                     </li>
                     <!-- 添加马赫数选择框 -->
                     <li>
-                        <span>选择马赫数:</span>
+                        <span>选择马赫数：</span>
                         <el-select v-model="Ma_sample" style="width: 50%;" placeholder="筛选马赫数">
                             <el-option v-for="(value, index) in machOptions" :key="index" :value="value">{{ value }}
                             </el-option>
@@ -48,14 +48,16 @@
                     </li>
                     <!-- 添加雷诺数选择框 -->
                     <li>
-                        <span>选择雷诺数:</span>
+                        <span>选择雷诺数：</span>
                         <el-select v-model="Re_sample" style="width: 50%;" placeholder="筛选马赫数">
                             <el-option v-for="(value, index) in reynoldsOptions" :key="index" :value="value">{{ value }}
                             </el-option>
                         </el-select>
                     </li>
                 </ul>
-                <button @click="submitData" class="confirm">提交</button>
+                <div class="button-container">
+                    <el-button type="primary" @click="submitData" class="confirm">提交</el-button> <!-- 提交按钮 -->
+                </div>
             </div>
         </div>
     </div>
@@ -231,103 +233,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.burgers-liner {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    height: 100%;
-}
-
-.content {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    height: 100%;
-}
-
-.chart-container {
-    flex: 3;
-    padding: 20px;
-    background-color: #ffffff;
-    border: 1px solid #dcdfe6;
-    border-radius: 8px;
-    height: auto;
-    position: relative;
-}
-
-.chart-title {
-    position: absolute;
-    top: 10px;
-    left: 20px;
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.parameters {
-    flex: 1;
-    margin-left: 20px;
-    padding: 20px;
-    padding-top: 10px;
-    background-color: #f9f9f9;
-    border: 1px solid #dcdfe6;
-    border-radius: 8px;
-}
-
-.parameters h3 {
-    margin-bottom: 20px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.file-choose {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.uploaded-content {
-    margin: 20px 0;
-}
-
-.file-input {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    opacity: 0;
-}
-
-.f-button {
-    width: 100%;
-    height: 40px;
-    background-color: #409eff;
-    text-align: center;
-    line-height: 40px;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.data li {
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-}
-
-.data li span {
-    width: 120px;
-    font-weight: bold;
-}
-
-.confirm {
-    width: 100%;
-    padding: 10px 0;
-    background-color: #409eff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-</style>
+<style src="../../css/styles/drawing-tool.css"></style>
