@@ -49,7 +49,7 @@
                     <!-- 添加雷诺数选择框 -->
                     <li>
                         <span>选择雷诺数：</span>
-                        <el-select v-model="Re_sample" style="width: 50%;" placeholder="筛选马赫数">
+                        <el-select v-model="Re_sample" style="width: 50%;" placeholder="筛选雷诺数">
                             <el-option v-for="(value, index) in reynoldsOptions" :key="index" :value="value">{{ value }}
                             </el-option>
                         </el-select>
