@@ -36,6 +36,8 @@ import CASTLinear from './components/parameters/CASTLinear.vue';
 import MainMenu from './components/MainMenu.vue';        
 import FusionScatter from './components/parameters/FusionScatter.vue';
 import Fusion3DScatter from './components/parameters/Fusion3DScatter.vue';
+import NSContour from './components/parameters/NSContour.vue';
+import SAContour from './components/parameters/SAContour.vue';
 
 export default {
     data() {
@@ -46,11 +48,13 @@ export default {
                 BL: markRaw(BurgersLinear),
                 BC: markRaw(BurgersContour),
                 NL: markRaw(NSLinear),
+                NC: markRaw(NSContour),
                 ML: markRaw(M6Linear),
                 NAL: markRaw(NACALinear),
                 CL: markRaw(CASTLinear),
                 FS: markRaw(FusionScatter),
                 F3DS: markRaw(Fusion3DScatter),
+                SA: markRaw(SAContour)
             },
         };
     },

@@ -32,6 +32,7 @@ export default {
                     icon: "el-icon-s-data",
                     children: [
                         { title: "折线图", action: "NL" },
+                        { title: "等高线图", action: "NC" },
                     ],
                 },
                 {
@@ -55,6 +56,13 @@ export default {
                     children: [
                         { title: "散点图", action: "FS" },
                         { title: "3维散点图", action: "F3DS" },
+                    ],
+                },
+                {
+                    title: "S-A方程",
+                    icon: "el-icon-s-cooperation",
+                    children: [
+                        { title: "等高线图", action: "SA" },
                     ],
                 },
             ],
