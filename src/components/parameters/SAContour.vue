@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import { ref, toRaw } from 'vue';
+import { onMounted, ref, toRaw } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Delaunay } from 'd3-delaunay';
@@ -72,6 +72,12 @@ export default {
     const threeContainer = ref(null);
 
     let scene, camera, renderer, controls;
+    let jetColorScale = null;  // 用于存储 Jet 颜色映射
+
+    const jetScale = d3.scaleLinear()
+    .domain([0, 0.125, 0.375, 0.625, 0.875, 1]) // 数据的范围
+    .range(['rgb(0,0,131)', 'rgb(0,60,170)', 'rgb(5,255,255)', 'rgb(255,255,0)', 'rgb(250,0,0)', 'rgb(128,0,0)']);
+
 
     // 处理上传文件（构建面文件）
     const handleMeshFileChange = (file) => {
@@ -186,7 +192,7 @@ export default {
       });
 
       // 环境光：为整个场景提供均匀光照，消除阴影过深的区域
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.); 
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.);
       scene.add(ambientLight);
 
       animate();
@@ -271,9 +277,8 @@ export default {
     // 颜色映射函数
     const pressureToColor = (pressure, globalMinPressure, globalMaxPressure) => {
       const t = Math.max(0, Math.min(1, (pressure - globalMinPressure) / (globalMaxPressure - globalMinPressure)));
-      const reversedT = 1 - t;
-      const jetColor = d3.scaleSequential(d3.interpolateSpectral).domain([0, 1]);
-      return new THREE.Color(jetColor(reversedT));
+
+      return new THREE.Color(jetScale(t));
     };
 
     // 动画循环
