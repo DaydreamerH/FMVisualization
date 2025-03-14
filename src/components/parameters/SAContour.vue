@@ -294,17 +294,6 @@ export default {
 </script>
 
 <style scoped>
-.main-chart {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.content {
-  display: flex;
-  height: 100%;
-}
-
 .chart-container {
   flex: 2;
   background: #eee;
@@ -333,3 +322,4 @@ export default {
   border-radius: 5px;
 }
 </style>
+<style src="../../css/styles/drawing-tool.css"></style>
