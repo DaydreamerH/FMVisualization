@@ -196,7 +196,7 @@ export default {
       scene.add(ambientLight);
 
       // 添加坐标轴
-      const axesHelper = new THREE.AxesHelper(1); // 坐标轴大小
+      const axesHelper = new THREE.AxesHelper(10); // 坐标轴大小
       axesHelper.material.linewidth = 2; // 设置线条宽度为 2，适合可视化
       axesHelper.setColors(new THREE.Color(0x808080), new THREE.Color(0x808080), new THREE.Color(0x808080)); // 将坐标轴颜色设置为灰色
       scene.add(axesHelper);
