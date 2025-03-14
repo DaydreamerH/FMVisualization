@@ -75,8 +75,8 @@ export default {
     let jetColorScale = null;  // 用于存储 Jet 颜色映射
 
     const jetScale = d3.scaleLinear()
-    .domain([0, 0.125, 0.375, 0.625, 0.875, 1]) // 数据的范围
-    .range(['rgb(0,0,131)', 'rgb(0,60,170)', 'rgb(5,255,255)', 'rgb(255,255,0)', 'rgb(250,0,0)', 'rgb(128,0,0)']);
+      .domain([0, 0.125, 0.375, 0.625, 0.875, 1]) // 数据的范围
+      .range(['rgb(0,0,131)', 'rgb(0,60,170)', 'rgb(5,255,255)', 'rgb(255,255,0)', 'rgb(250,0,0)', 'rgb(128,0,0)']);
 
 
     // 处理上传文件（构建面文件）
@@ -192,8 +192,14 @@ export default {
       });
 
       // 环境光：为整个场景提供均匀光照，消除阴影过深的区域
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 2.);
       scene.add(ambientLight);
+
+      // 添加坐标轴
+      const axesHelper = new THREE.AxesHelper(1); // 坐标轴大小
+      axesHelper.material.linewidth = 2; // 设置线条宽度为 2，适合可视化
+      axesHelper.setColors(new THREE.Color(0x808080), new THREE.Color(0x808080), new THREE.Color(0x808080)); // 将坐标轴颜色设置为灰色
+      scene.add(axesHelper);
 
       animate();
     };
@@ -287,7 +293,7 @@ export default {
       if (controls) controls.update();
       if (renderer && scene && camera) renderer.render(scene, camera);
     };
-
+  
     return { threeContainer, meshFileList, lineFileList, handleMeshFileChange, handleLineFileChange, removeMeshFile, removeLineFile, renderMesh };
   }
 };
