@@ -8,16 +8,22 @@
       <div class="parameters">
         <h3>参数设置</h3>
         <div class="file-choose">
-          <el-upload class="upload-demo" drag accept=".txt" :on-change="handleFileChange" :show-file-list="false"
-            :auto-upload="false">
+          <el-upload class="upload-demo" drag accept=".txt" :on-change="handleFileChange" :auto-upload="false"
+            :show-file-list="false">
             <i class="el-icon-upload"></i>
             <div>选择数据文件</div>
           </el-upload>
         </div>
 
-        <!-- 显示上传文件名 -->
-        <div class="uploaded-content" v-if="fileName">
-          <h4>已选择文件：{{ fileName }}</h4>
+        <!-- 显示已上传的文件列表 -->
+        <div class="uploaded-content" v-if="fileList.length">
+          <h4>已上传文件：</h4>
+          <ul>
+            <li v-for="(file, index) in fileList" :key="index">
+              {{ file.name }}
+              <el-button type="danger" size="small" @click="removeFile(index)">删除</el-button>
+            </li>
+          </ul>
         </div>
 
         <div class="button-container">
@@ -33,46 +39,51 @@ import { ref, toRaw } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Delaunay } from 'd3-delaunay';
+import * as d3 from 'd3';
 
 export default {
   setup() {
-    const fileContent = ref([]);
-    const fileName = ref('');
+    const fileList = ref([]); // 存储上传的文件列表
     const threeContainer = ref(null);
-    const fileList = ref([]);
 
     let scene, camera, renderer, controls;
 
+    // 处理文件上传
     const handleFileChange = (file) => {
-      fileName.value = file.name;
-
       const reader = new FileReader();
       reader.onload = (e) => {
-        processFileContent(e.target.result);
+        const content = processFileContent(e.target.result);
+        fileList.value.push({ name: file.name, data: content });
       };
       reader.readAsText(file.raw);
     };
 
+    // 解析文件内容
     const processFileContent = (content) => {
       const lines = content.split('\n').filter(line => line.trim() !== '');
-      fileContent.value = lines.map(line => {
+      return lines.map(line => {
         const columns = line.split(',').map(col => col.trim());
         return {
           x: parseFloat(columns[1]),
           y: parseFloat(columns[2]),
           z: parseFloat(columns[3]),
+          pressure: parseFloat(columns[4])
         };
       });
-      fileList.value.push(fileContent.value);
     };
 
+    // 移除已上传的文件
+    const removeFile = (index) => {
+      fileList.value.splice(index, 1);
+    };
+
+    // 渲染 3D 机翼
     const renderMesh = () => {
-      if (fileContent.value.length === 0) {
+      if (fileList.value.length === 0) {
         alert("请先上传数据文件！");
         return;
       }
 
-      // 清空旧的场景
       if (scene) {
         scene.clear();
       }
@@ -80,7 +91,6 @@ export default {
       const container = toRaw(threeContainer.value);
       container.innerHTML = '';
 
-      // 初始化 Three.js 场景
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf0f0f0);
 
@@ -94,12 +104,23 @@ export default {
       controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
 
-      // 生成机翼的三角网格，传入外部数据
+      let globalMaxPressure = -Infinity;
+      let globalMinPressure = Infinity;
+
       fileList.value.forEach(file => {
-        const geometry = createMeshGeometry(file);
+        const validPressures = file.data.filter(p => !isNaN(p.pressure));
+        const maxPressureInFile = Math.max(...validPressures.map(p => p.pressure));
+        const minPressureInFile = Math.min(...validPressures.map(p => p.pressure));
+
+        globalMaxPressure = Math.max(globalMaxPressure, maxPressureInFile);
+        globalMinPressure = Math.min(globalMinPressure, minPressureInFile);
+      });
+
+      fileList.value.forEach(file => {
+        const geometry = createMeshGeometry(file.data, globalMinPressure, globalMaxPressure);
         const material = new THREE.MeshBasicMaterial({
-          color: 0x0077ff,  // 固定颜色
-          side: THREE.DoubleSide,  // 渲染两面
+          vertexColors: true,
+          side: THREE.DoubleSide,
           wireframe: false
         });
         const mesh = new THREE.Mesh(geometry, material);
@@ -109,46 +130,52 @@ export default {
       animate();
     };
 
-    const createMeshGeometry = (pointsData) => {
-      // 使用x和z坐标进行Delaunay剖分
+    // 生成机翼网格
+    const createMeshGeometry = (pointsData, globalMinPressure, globalMaxPressure) => {
       const points = pointsData.map(p => [p.x, p.z]);
       const delaunay = Delaunay.from(points);
       const { triangles } = delaunay;
 
       const geometry = new THREE.BufferGeometry();
       const vertices = [];
+      const colors = [];
       const indices = [];
 
-      // 填充顶点数据
       pointsData.forEach(p => {
         vertices.push(p.x, p.y, p.z);
+        const color = pressureToColor(p.pressure, globalMinPressure, globalMaxPressure);
+        colors.push(color.r, color.g, color.b);
       });
 
-      // 调整顶点顺序为逆时针
       for (let i = 0; i < triangles.length; i += 3) {
-        indices.push(
-          triangles[i],
-          triangles[i + 2], // 交换顺序
-          triangles[i + 1]
-        );
+        indices.push(triangles[i], triangles[i + 1], triangles[i + 2]);
       }
 
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
       geometry.setIndex(indices);
       geometry.computeVertexNormals();
-      geometry.normalizeNormals(); // 规范化法线
+      geometry.normalizeNormals();
 
       return geometry;
     };
 
+    // 颜色映射
+    const pressureToColor = (pressure, globalMinPressure, globalMaxPressure) => {
+      const t = Math.max(0, Math.min(1, (pressure - globalMinPressure) / (globalMaxPressure - globalMinPressure)));
+      const reversedT = 1 - t;
+      const jetColor = d3.scaleSequential(d3.interpolateSpectral).domain([0, 1]);
+      return new THREE.Color(jetColor(reversedT));
+    };
 
+    // 动画循环
     const animate = () => {
       requestAnimationFrame(animate);
       if (controls) controls.update();
       if (renderer && scene && camera) renderer.render(scene, camera);
     };
 
-    return { threeContainer, fileName, handleFileChange, renderMesh };
+    return { threeContainer, fileList, handleFileChange, removeFile, renderMesh };
   }
 };
 </script>
@@ -176,5 +203,20 @@ export default {
   padding: 20px;
   background: #fff;
   border-left: 1px solid #ddd;
+}
+
+.uploaded-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.uploaded-content li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+  padding: 5px;
+  background: #f5f5f5;
+  border-radius: 5px;
 }
 </style>
