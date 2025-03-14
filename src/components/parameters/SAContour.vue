@@ -7,21 +7,44 @@
       <!-- 右侧：参数设置 -->
       <div class="parameters">
         <h3>参数设置</h3>
+        <!-- 上传用于构建面的数据文件 -->
         <div class="file-choose">
-          <el-upload class="upload-demo" drag accept=".txt" :on-change="handleFileChange" :auto-upload="false"
+          <h4>构建面文件上传</h4>
+          <el-upload class="upload-demo" drag accept=".txt" :on-change="handleMeshFileChange" :auto-upload="false"
             :show-file-list="false">
             <i class="el-icon-upload"></i>
-            <div>选择数据文件</div>
+            <div>选择构建面数据文件</div>
           </el-upload>
         </div>
 
-        <!-- 显示已上传的文件列表 -->
-        <div class="uploaded-content" v-if="fileList.length">
-          <h4>已上传文件：</h4>
+        <!-- 显示已上传的构建面文件列表 -->
+        <div class="uploaded-content" v-if="meshFileList.length">
+          <h4>已上传构建面文件：</h4>
           <ul>
-            <li v-for="(file, index) in fileList" :key="index">
+            <li v-for="(file, index) in meshFileList" :key="index">
               {{ file.name }}
-              <el-button type="danger" size="small" @click="removeFile(index)">删除</el-button>
+              <el-button type="danger" size="small" @click="removeMeshFile(index)">删除</el-button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 上传用于构建环的数据文件 -->
+        <div class="file-choose">
+          <h4>构建环文件上传</h4>
+          <el-upload class="upload-demo" drag accept=".txt" :on-change="handleLineFileChange" :auto-upload="false"
+            :show-file-list="false">
+            <i class="el-icon-upload"></i>
+            <div>选择构建环数据文件</div>
+          </el-upload>
+        </div>
+
+        <!-- 显示已上传的构建环文件列表 -->
+        <div class="uploaded-content" v-if="lineFileList.length">
+          <h4>已上传构建环文件：</h4>
+          <ul>
+            <li v-for="(file, index) in lineFileList" :key="index">
+              {{ file.name }}
+              <el-button type="danger" size="small" @click="removeLineFile(index)">删除</el-button>
             </li>
           </ul>
         </div>
@@ -43,17 +66,29 @@ import * as d3 from 'd3';
 
 export default {
   setup() {
-    const fileList = ref([]); // 存储上传的文件列表
+    // 两类文件列表：用于构建面和用于构建环
+    const meshFileList = ref([]); // 构建面文件
+    const lineFileList = ref([]); // 构建环文件
     const threeContainer = ref(null);
 
     let scene, camera, renderer, controls;
 
-    // 处理文件上传
-    const handleFileChange = (file) => {
+    // 处理上传文件（构建面文件）
+    const handleMeshFileChange = (file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = processFileContent(e.target.result);
-        fileList.value.push({ name: file.name, data: content });
+        meshFileList.value.push({ name: file.name, data: content });
+      };
+      reader.readAsText(file.raw);
+    };
+
+    // 处理上传文件（构建环文件）
+    const handleLineFileChange = (file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = processFileContent(e.target.result);
+        lineFileList.value.push({ name: file.name, data: content });
       };
       reader.readAsText(file.raw);
     };
@@ -72,14 +107,19 @@ export default {
       });
     };
 
-    // 移除已上传的文件
-    const removeFile = (index) => {
-      fileList.value.splice(index, 1);
+    // 删除构建面文件
+    const removeMeshFile = (index) => {
+      meshFileList.value.splice(index, 1);
     };
 
-    // 渲染 3D 机翼
+    // 删除构建环文件
+    const removeLineFile = (index) => {
+      lineFileList.value.splice(index, 1);
+    };
+
+    // 渲染 3D 机翼：分别处理构建面和构建环的文件
     const renderMesh = () => {
-      if (fileList.value.length === 0) {
+      if (meshFileList.value.length === 0 && lineFileList.value.length === 0) {
         alert("请先上传数据文件！");
         return;
       }
@@ -104,42 +144,56 @@ export default {
       controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
 
+      // 计算全局 pressure 范围（两个文件列表合并）
       let globalMaxPressure = -Infinity;
       let globalMinPressure = Infinity;
 
-      fileList.value.forEach(file => {
+      // 遍历构建面文件
+      meshFileList.value.forEach(file => {
         const validPressures = file.data.filter(p => !isNaN(p.pressure));
         const maxPressureInFile = Math.max(...validPressures.map(p => p.pressure));
         const minPressureInFile = Math.min(...validPressures.map(p => p.pressure));
-
+        globalMaxPressure = Math.max(globalMaxPressure, maxPressureInFile);
+        globalMinPressure = Math.min(globalMinPressure, minPressureInFile);
+      });
+      // 遍历构建环文件
+      lineFileList.value.forEach(file => {
+        const validPressures = file.data.filter(p => !isNaN(p.pressure));
+        const maxPressureInFile = Math.max(...validPressures.map(p => p.pressure));
+        const minPressureInFile = Math.min(...validPressures.map(p => p.pressure));
         globalMaxPressure = Math.max(globalMaxPressure, maxPressureInFile);
         globalMinPressure = Math.min(globalMinPressure, minPressureInFile);
       });
 
-      //fileList.value.forEach(file => {
-      // const geometry = createMeshGeometry(file.data, globalMinPressure, globalMaxPressure);
-      // const material = new THREE.MeshBasicMaterial({
-      //  vertexColors: true,
-      //  side: THREE.DoubleSide,
-      //  wireframe: false
-      //});
-      //const mesh = new THREE.Mesh(geometry, material);
-      //scene.add(mesh);
-      //});
+      // 对构建面文件，生成网格
+      meshFileList.value.forEach(file => {
+        const geometry = createMeshGeometry(file.data, globalMinPressure, globalMaxPressure);
+        const material = new THREE.MeshStandardMaterial({
+          vertexColors: true,
+          side: THREE.DoubleSide,
+          wireframe: false
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+      });
 
-      fileList.value.forEach(file => {
-        const lineGeometry = createLineGeometry(file.data, globalMinPressure, globalMaxPressure);
+      // 对构建环文件，生成线条闭合环
+      lineFileList.value.forEach(file => {
+        const geometry = createLineGeometry(file.data, globalMinPressure, globalMaxPressure);
         const material = new THREE.LineBasicMaterial({ vertexColors: true });
-        const line = new THREE.LineLoop(lineGeometry, material);
+        const line = new THREE.LineLoop(geometry, material);
         scene.add(line);
       });
+
+      // 环境光：为整个场景提供均匀光照，消除阴影过深的区域
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.); 
+      scene.add(ambientLight);
 
       animate();
     };
 
-
+    // 用极角排序构造闭合环：假设所有点在同一平面上（例如 xy 平面）
     const createLineGeometry = (pointsData, globalMinPressure, globalMaxPressure) => {
-      // 如果没有数据或只有一个点，则直接返回空或单点几何
       if (pointsData.length === 0) return new THREE.BufferGeometry();
       if (pointsData.length === 1) {
         const geometry = new THREE.BufferGeometry();
@@ -148,8 +202,7 @@ export default {
         return geometry;
       }
 
-      // 由于所有点都在同一平面上（例如 xy 平面），
-      // 计算所有点的重心（centroid）
+      // 计算所有点在 xy 平面的重心
       let sumX = 0, sumY = 0;
       pointsData.forEach(pt => {
         sumX += pt.x;
@@ -158,15 +211,13 @@ export default {
       const centerX = sumX / pointsData.length;
       const centerY = sumY / pointsData.length;
 
-      // 对点按照其在 xy 平面上的极角进行排序
-      // 注意这里使用 Math.atan2(pt.y - centerY, pt.x - centerX)
+      // 按极角排序
       const sortedPoints = [...pointsData].sort((a, b) => {
         const angleA = Math.atan2(a.y - centerY, a.x - centerX);
         const angleB = Math.atan2(b.y - centerY, b.x - centerX);
         return angleA - angleB;
       });
 
-      // 构造闭合环的顶点数组：依次加入排序后的所有点，再加入第一个点以闭合
       const vertices = [];
       const colors = [];
       sortedPoints.forEach(pt => {
@@ -174,21 +225,21 @@ export default {
         const color = pressureToColor(pt.pressure, globalMinPressure, globalMaxPressure);
         colors.push(color.r, color.g, color.b);
       });
-      // 添加第一个点（闭合环）
+      // 加入首点以闭合环路
       const firstPt = sortedPoints[0];
       vertices.push(firstPt.x, firstPt.y, firstPt.z);
       const firstColor = pressureToColor(firstPt.pressure, globalMinPressure, globalMaxPressure);
       colors.push(firstColor.r, firstColor.g, firstColor.b);
 
-      // 创建 BufferGeometry 并设置属性
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
       geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
       return geometry;
     };
 
-    // 生成机翼网格
+    // 生成机翼网格，利用 d3-delaunay 构造面
     const createMeshGeometry = (pointsData, globalMinPressure, globalMaxPressure) => {
+      // 这里采用 x 与 z 作为二维投影（假设所有点在同一水平面上）
       const points = pointsData.map(p => [p.x, p.z]);
       const delaunay = Delaunay.from(points);
       const { triangles } = delaunay;
@@ -217,7 +268,7 @@ export default {
       return geometry;
     };
 
-    // 颜色映射
+    // 颜色映射函数
     const pressureToColor = (pressure, globalMinPressure, globalMaxPressure) => {
       const t = Math.max(0, Math.min(1, (pressure - globalMinPressure) / (globalMaxPressure - globalMinPressure)));
       const reversedT = 1 - t;
@@ -232,7 +283,7 @@ export default {
       if (renderer && scene && camera) renderer.render(scene, camera);
     };
 
-    return { threeContainer, fileList, handleFileChange, removeFile, renderMesh };
+    return { threeContainer, meshFileList, lineFileList, handleMeshFileChange, handleLineFileChange, removeMeshFile, removeLineFile, renderMesh };
   }
 };
 </script>
