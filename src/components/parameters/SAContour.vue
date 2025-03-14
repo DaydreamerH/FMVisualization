@@ -116,18 +116,75 @@ export default {
         globalMinPressure = Math.min(globalMinPressure, minPressureInFile);
       });
 
+      //fileList.value.forEach(file => {
+      // const geometry = createMeshGeometry(file.data, globalMinPressure, globalMaxPressure);
+      // const material = new THREE.MeshBasicMaterial({
+      //  vertexColors: true,
+      //  side: THREE.DoubleSide,
+      //  wireframe: false
+      //});
+      //const mesh = new THREE.Mesh(geometry, material);
+      //scene.add(mesh);
+      //});
+
       fileList.value.forEach(file => {
-        const geometry = createMeshGeometry(file.data, globalMinPressure, globalMaxPressure);
-        const material = new THREE.MeshBasicMaterial({
-          vertexColors: true,
-          side: THREE.DoubleSide,
-          wireframe: false
-        });
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
+        const lineGeometry = createLineGeometry(file.data, globalMinPressure, globalMaxPressure);
+        const material = new THREE.LineBasicMaterial({ vertexColors: true });
+        const line = new THREE.LineLoop(lineGeometry, material);
+        scene.add(line);
       });
 
       animate();
+    };
+
+
+    const createLineGeometry = (pointsData, globalMinPressure, globalMaxPressure) => {
+      // 如果没有数据或只有一个点，则直接返回空或单点几何
+      if (pointsData.length === 0) return new THREE.BufferGeometry();
+      if (pointsData.length === 1) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(
+          [pointsData[0].x, pointsData[0].y, pointsData[0].z], 3));
+        return geometry;
+      }
+
+      // 由于所有点都在同一平面上（例如 xy 平面），
+      // 计算所有点的重心（centroid）
+      let sumX = 0, sumY = 0;
+      pointsData.forEach(pt => {
+        sumX += pt.x;
+        sumY += pt.y;
+      });
+      const centerX = sumX / pointsData.length;
+      const centerY = sumY / pointsData.length;
+
+      // 对点按照其在 xy 平面上的极角进行排序
+      // 注意这里使用 Math.atan2(pt.y - centerY, pt.x - centerX)
+      const sortedPoints = [...pointsData].sort((a, b) => {
+        const angleA = Math.atan2(a.y - centerY, a.x - centerX);
+        const angleB = Math.atan2(b.y - centerY, b.x - centerX);
+        return angleA - angleB;
+      });
+
+      // 构造闭合环的顶点数组：依次加入排序后的所有点，再加入第一个点以闭合
+      const vertices = [];
+      const colors = [];
+      sortedPoints.forEach(pt => {
+        vertices.push(pt.x, pt.y, pt.z);
+        const color = pressureToColor(pt.pressure, globalMinPressure, globalMaxPressure);
+        colors.push(color.r, color.g, color.b);
+      });
+      // 添加第一个点（闭合环）
+      const firstPt = sortedPoints[0];
+      vertices.push(firstPt.x, firstPt.y, firstPt.z);
+      const firstColor = pressureToColor(firstPt.pressure, globalMinPressure, globalMaxPressure);
+      colors.push(firstColor.r, firstColor.g, firstColor.b);
+
+      // 创建 BufferGeometry 并设置属性
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      return geometry;
     };
 
     // 生成机翼网格
