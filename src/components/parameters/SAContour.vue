@@ -72,7 +72,6 @@ export default {
     const threeContainer = ref(null);
 
     let scene, camera, renderer, controls;
-    let jetColorScale = null;  // 用于存储 Jet 颜色映射
 
     const jetScale = d3.scaleLinear()
       .domain([0, 0.125, 0.375, 0.625, 0.875, 1]) // 数据的范围
