@@ -115,7 +115,7 @@ export default {
         this.$message.error('请先选择维度!');
         return;
       }
-
+      console.time('绘图时间');
       const firstParm = parseInt(this.firstParm);
       const secondParm = parseInt(this.secondParm);
       const selectedV = this.selectedV;
@@ -200,6 +200,7 @@ export default {
       };
 
       chart.setOption(option);
+      console.timeEnd('绘图时间');
     },
   },
 };

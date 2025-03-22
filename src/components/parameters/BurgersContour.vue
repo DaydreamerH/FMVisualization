@@ -106,7 +106,7 @@ export default {
         this.$message.error('请先选择维度!');
         return;
       }
-
+      console.time('绘图时间')
       const firstParm = parseInt(this.firstParm);
       const secondParm = parseInt(this.secondParm);
       const selectedV = this.selectedV;
@@ -180,6 +180,7 @@ export default {
       // 获取 Plotly 容器并绘制图表
       const chartDom = document.getElementById("plotly-chart");
       Plotly.react(chartDom, [contourData], layout); // 使用 react 确保图表刷新
+      console.timeEnd('绘图时间')
     },
   },
 };

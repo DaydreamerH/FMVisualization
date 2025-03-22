@@ -92,6 +92,9 @@ export default {
                 this.$message.error('请选择参数')
                 return
             }
+
+            console.time('绘制时间')
+
             // 提交数据逻辑
             const firstDimensionLength = 6;
             const firstParm = parseInt(this.firstParm);
@@ -142,6 +145,7 @@ export default {
             };
 
             chart.setOption(option);
+            console.timeEnd('绘制时间')
         }
     },
 };

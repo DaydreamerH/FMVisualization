@@ -96,7 +96,7 @@ export default {
                 return;
             }
 
-
+            console.time('绘制时间')
 
             const SHAPE_DATA_LENGTH = 562;
 
@@ -211,6 +211,7 @@ export default {
                     }
                 ],
             });
+            console.timeEnd('绘制时间')
         }
         ,
     },
