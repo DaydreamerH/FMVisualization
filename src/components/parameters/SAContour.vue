@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import { onMounted, ref, toRaw } from 'vue';
+import { ref, toRaw } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Delaunay } from 'd3-delaunay';
@@ -191,7 +191,7 @@ export default {
       });
 
       // 环境光：为整个场景提供均匀光照，消除阴影过深的区域
-      const ambientLight = new THREE.AmbientLight(0xffffff, 2.);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
       scene.add(ambientLight);
 
       // 添加坐标轴
@@ -199,6 +199,25 @@ export default {
       axesHelper.material.linewidth = 2; // 设置线条宽度为 2，适合可视化
       axesHelper.setColors(new THREE.Color(0x808080), new THREE.Color(0x808080), new THREE.Color(0x808080)); // 将坐标轴颜色设置为灰色
       scene.add(axesHelper);
+
+      // 调用 createLegend 获取 HUD 图例相关对象
+      const { hudScene, hudCamera } = createLegend(globalMaxPressure, globalMinPressure);
+
+      // 修改渲染器设置（关闭自动清除）
+      renderer.autoClear = false;
+
+      // 渲染循环：先渲染主场景，再渲染 HUD 层
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+
+
+        renderer.clear();
+        renderer.render(scene, camera);
+
+        renderer.clearDepth();
+        renderer.render(hudScene, hudCamera);
+      }
 
       animate();
     };
@@ -292,7 +311,112 @@ export default {
       if (controls) controls.update();
       if (renderer && scene && camera) renderer.render(scene, camera);
     };
-  
+
+    const createLegend = (globalMaxPressure, globalMinPressure) => {
+      // 创建 HUD 场景
+      const hudScene = new THREE.Scene();
+
+      // 创建正交摄像头，坐标范围基于 window 尺寸（单位：像素）
+      const hudCamera = new THREE.OrthographicCamera(
+        window.innerWidth / -2,  // left
+        window.innerWidth / 2,   // right
+        window.innerHeight / 2,  // top
+        window.innerHeight / -2, // bottom
+        0,                       // near
+        30                       // far
+      );
+      hudCamera.position.z = 10; // 确保摄像头在 HUD 对象前面
+
+      // 定义尺寸：整个容器、文本区域与渐变区域
+      const containerWidth = 300;      // 容器宽度
+      const containerHeight = 600;     // 容器高度
+      const textBoxHeight = 50;        // 文本区域高度
+      const gradientWidth = 60;        // 渐变区域宽度
+      const gradientHeight = 400;      // 渐变区域高度
+      const tickLength = 10;           // 刻度线长度
+      const numTicks = 11;             // 刻度数量
+
+      // 创建一个 Canvas，尺寸为整个容器的大小
+      const legendCanvas = document.createElement('canvas');
+      legendCanvas.width = containerWidth;
+      legendCanvas.height = containerHeight;
+      const ctx = legendCanvas.getContext('2d');
+
+      // 清空画布（透明背景）
+      ctx.fillStyle = 'rgba(255,255,255,0)';
+      ctx.fillRect(0, 0, containerWidth, containerHeight);
+
+      // 绘制文本：文本区域在顶部，占据整个容器宽度和 textBoxHeight 高度
+      const text = "Static Pressure [Pa]";
+      ctx.font = "20px sans-serif";
+      ctx.fillStyle = "black";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      // 文本从左侧开始显示
+      ctx.fillText(text, 0, textBoxHeight / 2);
+
+      // 定义渐变区域的位置：位于文本区域下方，左侧对齐
+      const gradientX = 0;
+      const gradientY = textBoxHeight; // 从文本区域下方开始
+
+      // 绘制渐变：沿竖直方向逐行绘制颜色
+      for (let y = 0; y < gradientHeight; y++) {
+        const t = y / (gradientHeight - 1); // t 从 0 到 1
+        const value = 1 - t; // 翻转，使得上部对应 1（红色），下部对应 0（蓝色）
+        const color = jetScale(value);
+        ctx.fillStyle = color;
+        ctx.fillRect(gradientX, gradientY + y, gradientWidth, 1);
+      }
+
+      // 绘制渐变区域边框
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(gradientX, gradientY, gradientWidth, gradientHeight);
+
+      // 绘制刻度线和标签
+      ctx.fillStyle = 'black';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.font = "18px sans-serif";
+
+      for (let i = 0; i < numTicks; i++) {
+        const y = gradientY + (i * gradientHeight) / (numTicks - 1);
+        // 绘制刻度线
+        ctx.beginPath();
+        ctx.moveTo(gradientX + gradientWidth, y);
+        ctx.lineTo(gradientX + gradientWidth + tickLength, y);
+        ctx.stroke();
+        // 计算并绘制标签
+        const pressureValue = globalMaxPressure - (i * (globalMaxPressure - globalMinPressure) / (numTicks - 1));
+        const label = pressureValue.toExponential(2); 
+        ctx.fillText(label, gradientX + gradientWidth + tickLength + 5, y);
+      }
+
+      // 利用 Canvas 创建纹理
+      const legendTexture = new THREE.CanvasTexture(legendCanvas);
+
+      // 创建与 Canvas 尺寸对应的平面几何体
+      const legendGeometry = new THREE.PlaneGeometry(containerWidth, containerHeight);
+      const legendMaterial = new THREE.MeshBasicMaterial({
+        map: legendTexture,
+        transparent: true
+      });
+      const legendMesh = new THREE.Mesh(legendGeometry, legendMaterial);
+
+      // 将图例定位在屏幕左上角，设置一定边距（例如 margin = 10）
+      const margin = 10;
+      legendMesh.position.x = -window.innerWidth / 2 + margin + containerWidth / 2;
+      legendMesh.position.y = window.innerHeight / 2 - containerHeight / 2 - margin;
+
+      // 将图例加入 HUD 场景
+      hudScene.add(legendMesh);
+
+      // 返回 HUD 场景和正交摄像头，便于在渲染循环中使用
+      return { hudScene, hudCamera, legendMesh };
+    };
+
+
+
     return { threeContainer, meshFileList, lineFileList, handleMeshFileChange, handleLineFileChange, removeMeshFile, removeLineFile, renderMesh };
   }
 };
