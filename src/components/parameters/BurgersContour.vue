@@ -4,7 +4,7 @@
     <div class="content">
       <!-- 左侧：图表展示 -->
       <div class="chart-container">
-        <div class="chart-title">Burgers方程等高线图</div>
+        <div class="chart-title">Burgers方程热力图</div>
         <div id="plotly-chart" style="height: 94%;top:3%;position: relative"></div>
       </div>
 

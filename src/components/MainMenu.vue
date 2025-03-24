@@ -24,7 +24,7 @@ export default {
                     icon: "el-icon-s-grid",
                     children: [
                         { title: "折线图", action: "BL" },
-                        { title: "等高线图", action: "BC" },
+                        { title: "热力图", action: "BC" },
                     ],
                 },
                 {
@@ -32,7 +32,7 @@ export default {
                     icon: "el-icon-s-data",
                     children: [
                         { title: "折线图", action: "NL" },
-                        { title: "等高线图", action: "NC" },
+                        { title: "热力图", action: "NC" },
                     ],
                 },
                 {
@@ -62,7 +62,7 @@ export default {
                     title: "S-A方程",
                     icon: "el-icon-s-cooperation",
                     children: [
-                        { title: "等高线图", action: "SA" },
+                        { title: "三维压力场", action: "SA" },
                     ],
                 },
             ],

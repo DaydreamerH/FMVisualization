@@ -148,7 +148,7 @@ export default {
         return;
       }
 
-
+      console.time('绘制时间')
       const firstParm = parseInt(this.firstParm);
       const secondParm = parseInt(this.secondParm);
 
@@ -208,6 +208,7 @@ export default {
         ],
       };
       chart.setOption(option);
+      console.timeEnd('绘制时间')
     },
   },
 };
