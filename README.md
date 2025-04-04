@@ -1,29 +1,5 @@
-# FMVisualization
+# 气动数据可视化平台
 
-This template should help get you started developing with Vue 3 in Vite.
+本科毕设的项目，基于Vue ECharts Plotly Three.js实现气动数据可视化。
 
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
+包含：Burgers方程 NS方程 SA方程 M6翼型 NACA翼型 CAST翼型 气动数据融合相关数据集的可视化功能。
